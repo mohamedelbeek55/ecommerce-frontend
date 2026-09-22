@@ -45,7 +45,10 @@ export class LoginPage {
 
     const { email, password } = this.form.getRawValue();
 
-    this.authService.login(email!, password!).subscribe({
+    // Match the backend's @Transform: trim + lowercase email.
+    const trimmedEmail = email!.trim().toLowerCase();
+
+    this.authService.login(trimmedEmail!, password!).subscribe({
       next: () => {
         this.loading.set(false);
         // TODO: route to a real home page (currently no home route exists).

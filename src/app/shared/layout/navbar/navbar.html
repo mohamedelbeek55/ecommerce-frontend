@@ -1,0 +1,120 @@
+<nav class="sticky top-0 z-40 bg-surface border-b border-border">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="flex items-center justify-between h-16">
+            <!-- Brand -->
+            <a routerLink="/" (click)="closeAllMenus()"
+                class="text-xl font-bold text-primary hover:text-primary-hover transition">
+                Shop<span class="text-text">Ease</span>
+            </a>
+
+            <!-- Desktop nav links -->
+            <div class="hidden md:flex items-center gap-8">
+                <a routerLink="/" routerLinkActive="text-primary font-medium"
+                    [routerLinkActiveOptions]="{ exact: true }" class="text-text-muted hover:text-text transition">
+                    Home
+                </a>
+                <a routerLink="/products" routerLinkActive="text-primary font-medium"
+                    class="text-text-muted hover:text-text transition">
+                    Products
+                </a>
+            </div>
+
+            <!-- Desktop right side -->
+            <div class="hidden md:flex items-center gap-4">
+                <!-- Cart icon -->
+                <a routerLink="/cart" aria-label="Cart" class="text-text-muted hover:text-primary transition p-2">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                </a>
+
+                @if (isAuthenticated()) {
+                <!-- User menu -->
+                <div class="relative">
+                    <button type="button" (click)="toggleUserMenu()"
+                        class="flex items-center gap-2 text-text hover:text-primary transition">
+                        <span class="text-sm font-medium">{{ getUserDisplayName() }}</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+
+                    @if (userMenuOpen()) {
+                    <div class="absolute right-0 mt-2 w-44 bg-surface border border-border rounded-md shadow-sm py-1">
+                        <a routerLink="/account" (click)="closeAllMenus()"
+                            class="block px-4 py-2 text-sm text-text-muted hover:text-text hover:bg-background transition">
+                            My Account
+                        </a>
+                        <button type="button" (click)="logout()"
+                            class="block w-full text-left px-4 py-2 text-sm text-destructive hover:bg-background transition">
+                            Log out
+                        </button>
+                    </div>
+                    }
+                </div>
+                } @else {
+                <!-- Auth links -->
+                <a routerLink="/login" class="text-sm text-text-muted hover:text-text transition">
+                    Log in
+                </a>
+                <a routerLink="/register"
+                    class="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-md text-sm font-medium transition">
+                    Sign up
+                </a>
+                }
+            </div>
+
+            <!-- Mobile hamburger -->
+            <button type="button" (click)="toggleMobileMenu()" class="md:hidden text-text p-2" aria-label="Toggle menu">
+                @if (mobileMenuOpen()) {
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                } @else {
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+                }
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile menu panel -->
+    @if (mobileMenuOpen()) {
+    <div class="md:hidden border-t border-border bg-surface">
+        <div class="px-4 py-4 space-y-3">
+            <a routerLink="/" (click)="closeAllMenus()" class="block text-text-muted hover:text-text transition">
+                Home
+            </a>
+            <a routerLink="/products" (click)="closeAllMenus()"
+                class="block text-text-muted hover:text-text transition">
+                Products
+            </a>
+            <a routerLink="/cart" (click)="closeAllMenus()" class="block text-text-muted hover:text-text transition">
+                Cart
+            </a>
+
+            <div class="pt-3 border-t border-border">
+                @if (isAuthenticated()) {
+                <div class="mb-3 text-sm font-medium text-text">
+                    {{ getUserDisplayName() }}
+                </div>
+                <button type="button" (click)="logout()" class="block w-full text-left text-destructive text-sm">
+                    Log out
+                </button>
+                } @else {
+                <a routerLink="/login" (click)="closeAllMenus()"
+                    class="block text-text-muted hover:text-text transition mb-3">
+                    Log in
+                </a>
+                <a routerLink="/register" (click)="closeAllMenus()"
+                    class="block bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-md text-center text-sm font-medium transition">
+                    Sign up
+                </a>
+                }
+            </div>
+        </div>
+    </div>
+    }
+</nav>
