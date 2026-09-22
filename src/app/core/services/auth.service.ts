@@ -4,7 +4,9 @@ import { Observable, throwError } from 'rxjs';
 import { tap, finalize } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { TokenStorageService } from './token-storage.service';
-import { NormalizedError } from '../interceptors/error.interceptor';
+import { UsersService } from './users.service';
+import type { NormalizedError } from '../interceptors/error.interceptor';
+import type { UserProfile } from '../models/user.model';
 
 /**
  * Response shape from POST /auth/register, /auth/login, /auth/refresh.
@@ -15,42 +17,32 @@ export interface AuthTokens {
     refreshToken: string;
 }
 
-/**
- * Role values from the backend. Backend uses ADMIN / CUSTOMER (not USER).
- */
-export type UserRole = 'ADMIN' | 'CUSTOMER';
-
-/**
- * User profile shape — matches UserProfileResponseDto on the backend.
- * TODO: move to a shared `models/user.model.ts` once users.service.ts exists.
- */
-export interface UserProfile {
-    id: string;
-    email: string;
-    name: string;
-    role: UserRole;
-    createdAt: string;
-    updatedAt: string;
-}
-
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+    // ============================================================
+    // Dependencies
+    // ============================================================
     private readonly http = inject(HttpClient);
+    private readonly usersService = inject(UsersService);
     private readonly tokenStorage = inject(TokenStorageService);
 
+    // ============================================================
+    // Configuration
+    // ============================================================
     private readonly apiUrl = `${environment.apiUrl}/auth`;
 
-    /** Current authenticated user (profile). null when not logged in. */
+    // ============================================================
+    // State (signals)
+    // ============================================================
     private readonly currentUserSignal = signal<UserProfile | null>(null);
-
-    /** Read-only signal for consumers. */
     readonly currentUser = this.currentUserSignal.asReadonly();
-
-    /** True if an access token exists in storage. */
     readonly isAuthenticated = computed(
         () => !!this.tokenStorage.getAccessToken(),
     );
 
+    // ============================================================
+    // Public API
+    // ============================================================
     register(
         email: string,
         password: string,
@@ -62,6 +54,7 @@ export class AuthService {
                 tap((tokens) => {
                     this.tokenStorage.setTokens(tokens.accessToken, tokens.refreshToken);
                 }),
+                tap(() => this.loadCurrentUser()),
             );
     }
 
@@ -72,6 +65,7 @@ export class AuthService {
                 tap((tokens) => {
                     this.tokenStorage.setTokens(tokens.accessToken, tokens.refreshToken);
                 }),
+                tap(() => this.loadCurrentUser()),
             );
         // NOTE: 403 "email not verified" is NOT swallowed here — the error
         // interceptor normalizes it and the UI will surface it (next iteration).
@@ -108,5 +102,27 @@ export class AuthService {
                     this.tokenStorage.setTokens(tokens.accessToken, tokens.refreshToken);
                 }),
             );
+    }
+    verifyEmail(token: string): Observable<void> {
+        return this.http.post<void>(`${this.apiUrl}/verify-email`, { token });
+    }
+    // ============================================================
+    // Private helpers
+    // ============================================================
+
+
+    /**
+     * 
+     * 
+     * Fetches the current user's profile and stores it in the signal.
+     * Called after login/register (which only return tokens, no user object).
+     * Fails silently — the user still has valid tokens even if this fails.
+     */
+    private loadCurrentUser(): void {
+        this.usersService.getMe().subscribe({
+            next: (user) => this.currentUserSignal.set(user),
+            error: (err) =>
+                console.error('Failed to load current user profile:', err),
+        });
     }
 }

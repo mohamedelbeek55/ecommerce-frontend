@@ -1,0 +1,72 @@
+<div class="min-h-screen bg-background flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+        <div class="bg-surface border border-border rounded-lg p-8 shadow-sm text-center">
+            <!-- LOADING STATE -->
+            @if (state() === 'loading') {
+            <div class="py-4">
+                <div
+                    class="inline-block w-10 h-10 border-4 border-border border-t-primary rounded-full animate-spin mb-4">
+                </div>
+                <h1 class="text-xl font-semibold text-text mb-2">
+                    Verifying your email…
+                </h1>
+                <p class="text-text-muted text-sm">
+                    Please wait while we confirm your email address.
+                </p>
+            </div>
+            }
+
+            <!-- SUCCESS STATE -->
+            @if (state() === 'success') {
+            <div class="py-4">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+                    <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <h1 class="text-xl font-semibold text-text mb-2">
+                    Email verified!
+                </h1>
+                <p class="text-text-muted text-sm mb-6">
+                    Your email address has been successfully verified. You can now log in.
+                </p>
+                <a routerLink="/login"
+                    class="inline-block bg-primary hover:bg-primary-hover text-white px-6 py-2 rounded-md font-medium transition">
+                    Go to Login
+                </a>
+            </div>
+            }
+
+            <!-- ERROR STATE -->
+            @if (state() === 'error') {
+            <div class="py-4">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-destructive/10 mb-4">
+                    <svg class="w-8 h-8 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </div>
+                <h1 class="text-xl font-semibold text-text mb-2">
+                    Verification failed
+                </h1>
+                <p class="text-destructive text-sm mb-6">
+                    {{ errorMessage() }}
+                </p>
+                <div class="space-y-2">
+                    <a routerLink="/login"
+                        class="block w-full bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-md font-medium transition">
+                        Back to Login
+                    </a>
+                    <p class="text-text-muted text-xs pt-2">
+                        Need a new verification link?
+                        <a routerLink="/login" class="text-primary hover:text-primary-hover font-medium">
+                            Log in
+                        </a>
+                        and request another one.
+                    </p>
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+</div>
