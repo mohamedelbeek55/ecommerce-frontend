@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { CartService } from '../../../core/services/cart.service';
 
 @Component({
     selector: 'app-navbar',
@@ -11,6 +12,7 @@ import { AuthService } from '../../../core/services/auth.service';
 export class Navbar {
     private readonly authService = inject(AuthService);
     private readonly router = inject(Router);
+    readonly cartService = inject(CartService);
 
     /** Expose signals from AuthService to the template. */
     readonly isAuthenticated = this.authService.isAuthenticated;

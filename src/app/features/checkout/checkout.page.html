@@ -1,0 +1,141 @@
+<div class="min-h-screen bg-background">
+  <div class="max-w-4xl mx-auto px-4 py-10">
+
+    <h1 class="text-3xl font-bold text-text mb-8">Checkout</h1>
+
+    <!-- ───────────── Order loading skeleton ───────────── -->
+    @if (orderLoading()) {
+    <div class="bg-surface border border-border rounded-lg p-8 animate-pulse space-y-4">
+      <div class="h-5 bg-background rounded w-1/3"></div>
+      <div class="h-4 bg-background rounded w-1/2"></div>
+      <div class="h-4 bg-background rounded w-2/3"></div>
+      <div class="h-10 bg-background rounded w-1/4 mt-6"></div>
+    </div>
+    }
+
+    <!-- ───────────── Order error ───────────── -->
+    @if (!orderLoading() && orderError()) {
+    <div class="bg-surface border border-border rounded-lg p-16 text-center max-w-lg mx-auto">
+      <div class="text-5xl mb-4">⚠️</div>
+      <h2 class="text-xl font-semibold text-text mb-3">{{ orderError() }}</h2>
+      <a routerLink="/orders"
+        class="inline-block bg-primary hover:bg-primary-hover text-white px-6 py-3 rounded-md font-medium transition">
+        View My Orders
+      </a>
+    </div>
+    }
+
+    <!-- ───────────── Main checkout layout ───────────── -->
+    @if (!orderLoading() && !orderError() && order(); as o) {
+    <div class="flex flex-col lg:flex-row gap-8">
+
+      <!-- ── Left: payment form ── -->
+      <div class="flex-1 space-y-6">
+        <div class="bg-surface border border-border rounded-lg p-8">
+          <h2 class="text-lg font-semibold text-text mb-6">Payment</h2>
+
+          <!-- Payment intent loading -->
+          @if (intentLoading()) {
+          <div class="animate-pulse space-y-3">
+            <div class="h-4 bg-background rounded w-3/4"></div>
+            <div class="h-12 bg-background rounded"></div>
+            <div class="h-12 bg-background rounded"></div>
+            <div class="h-10 bg-background rounded w-1/3 mt-4"></div>
+          </div>
+          }
+
+          <!-- Payment intent error -->
+          @if (!intentLoading() && intentError()) {
+          <div role="alert"
+            class="flex items-center gap-2 text-sm font-medium text-destructive border border-destructive bg-surface rounded-md px-4 py-3">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 9v2m0 4h.01M12 3a9 9 0 100 18A9 9 0 0012 3z" />
+            </svg>
+            {{ intentError() }}
+          </div>
+          }
+
+          <!-- Payment success state -->
+          @if (paymentSuccess()) {
+          <div role="status" class="flex flex-col items-center text-center py-8 gap-4">
+            <div class="w-16 h-16 rounded-full bg-hero flex items-center justify-center">
+              <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <p class="text-lg font-semibold text-text">Payment successful!</p>
+            <p class="text-sm text-text-muted">Redirecting to your order…</p>
+          </div>
+          }
+
+          <!-- Stripe Elements + Pay Now button -->
+          @if (elementsReady() && !paymentSuccess()) {
+          <div class="space-y-6">
+            <!-- Mount point — Stripe injects its iframe here -->
+            <div #paymentElement id="payment-element"></div>
+
+            <!-- Payment error banner -->
+            @if (paymentError()) {
+            <div role="alert"
+              class="flex items-center gap-2 text-sm font-medium text-destructive border border-destructive bg-surface rounded-md px-4 py-3">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 9v2m0 4h.01M12 3a9 9 0 100 18A9 9 0 0012 3z" />
+              </svg>
+              {{ paymentError() }}
+            </div>
+            }
+
+            <!-- Pay Now button -->
+            <button type="button" (click)="onPayNow()" [disabled]="paymentLoading()"
+              class="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white px-6 py-3 rounded-md font-medium transition disabled:opacity-60 disabled:cursor-not-allowed">
+              @if (paymentLoading()) {
+              <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+              </svg>
+              Processing…
+              } @else {
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              Pay {{ o.total | currency }}
+              }
+            </button>
+
+            <p class="text-xs text-text-muted text-center">
+              Payments are processed securely by Stripe. Your card details never touch our servers.
+            </p>
+          </div>
+          }
+        </div>
+
+        <!-- Confirmation note -->
+        @if (!paymentSuccess()) {
+        <div class="flex items-start gap-3 text-sm text-text-muted bg-surface border border-border rounded-lg p-4">
+          <svg class="w-4 h-4 shrink-0 mt-0.5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20A10 10 0 0012 2z" />
+          </svg>
+          <span>
+            Your order <span class="font-medium text-text">#{{ o.id.slice(-8).toUpperCase() }}</span>
+            has been placed. Complete payment above to confirm it.
+          </span>
+        </div>
+        }
+      </div>
+
+      <!-- ── Right: order summary ── -->
+      <aside class="w-full lg:w-72 shrink-0">
+        <div class="sticky top-24">
+          <app-order-summary [order]="o" [showOrdersLink]="true" />
+        </div>
+      </aside>
+
+    </div>
+    }
+
+  </div>
+</div>

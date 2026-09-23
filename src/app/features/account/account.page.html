@@ -1,0 +1,118 @@
+<div class="min-h-screen bg-background">
+  <div class="max-w-lg mx-auto px-4 py-10">
+
+    <h1 class="text-3xl font-bold text-text mb-8">My Account</h1>
+
+    <!-- ───────────── Profile loading skeleton ───────────── -->
+    @if (profileLoading()) {
+      <div class="bg-surface border border-border rounded-lg p-8 animate-pulse space-y-4">
+        <div class="h-4 bg-background rounded w-1/3"></div>
+        <div class="h-10 bg-background rounded"></div>
+        <div class="h-4 bg-background rounded w-1/4 mt-4"></div>
+        <div class="h-10 bg-background rounded w-1/2"></div>
+      </div>
+    }
+
+    @if (!profileLoading()) {
+
+      <!-- ───────────── Read-only info ───────────── -->
+      <div class="bg-surface border border-border rounded-lg p-6 mb-6 space-y-4">
+        <h2 class="text-base font-semibold text-text">Account Info</h2>
+
+        <div class="space-y-3">
+          <div>
+            <p class="text-xs font-medium text-text-muted uppercase tracking-wide mb-1">Email</p>
+            <p class="text-sm text-text">{{ email() || '—' }}</p>
+          </div>
+          <div>
+            <p class="text-xs font-medium text-text-muted uppercase tracking-wide mb-1">Role</p>
+            <span class="inline-block text-xs font-semibold px-2.5 py-1 rounded border
+              {{ role() === 'ADMIN'
+                  ? 'border-primary text-primary bg-surface'
+                  : 'border-border text-text-muted bg-surface' }}">
+              {{ role() || '—' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ───────────── Edit name form ───────────── -->
+      <div class="bg-surface border border-border rounded-lg p-6">
+        <h2 class="text-base font-semibold text-text mb-5">Edit Profile</h2>
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="space-y-5">
+
+          <!-- Name field -->
+          <div>
+            <label for="name" class="block text-sm font-medium text-text mb-1.5">
+              Display Name
+            </label>
+            <input
+              id="name"
+              type="text"
+              formControlName="name"
+              autocomplete="name"
+              placeholder="Your name"
+              class="w-full rounded-md border px-3 py-2 text-sm text-text bg-surface placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary transition
+                {{ nameControl.invalid && nameControl.touched
+                    ? 'border-destructive'
+                    : 'border-border' }}" />
+
+            @if (nameControl.touched && nameControl.hasError('required')) {
+              <p class="mt-1.5 text-xs text-destructive">Name is required.</p>
+            } @else if (nameControl.touched && nameControl.hasError('minlength')) {
+              <p class="mt-1.5 text-xs text-destructive">Name must be at least 2 characters.</p>
+            } @else if (nameControl.touched && nameControl.hasError('maxlength')) {
+              <p class="mt-1.5 text-xs text-destructive">Name cannot exceed 50 characters.</p>
+            }
+          </div>
+
+          <!-- Success banner -->
+          @if (success()) {
+            <div role="status"
+                 class="flex items-center gap-2 text-sm font-medium text-primary bg-hero border border-primary rounded-md px-4 py-3">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              Profile updated successfully.
+            </div>
+          }
+
+          <!-- Error banners -->
+          @if (errors().length > 0) {
+            <div role="alert" class="space-y-1">
+              @for (msg of errors(); track msg) {
+                <div class="flex items-center gap-2 text-sm font-medium text-destructive border border-destructive bg-surface rounded-md px-4 py-3">
+                  <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 9v2m0 4h.01M12 3a9 9 0 100 18A9 9 0 0012 3z" />
+                  </svg>
+                  {{ msg }}
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Submit -->
+          <button
+            type="submit"
+            [disabled]="loading()"
+            class="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-6 py-2 rounded-md font-medium transition disabled:opacity-60 disabled:cursor-not-allowed">
+            @if (loading()) {
+              <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+              </svg>
+              Saving…
+            } @else {
+              Save Changes
+            }
+          </button>
+
+        </form>
+      </div>
+
+    }
+
+  </div>
+</div>

@@ -106,6 +106,15 @@ export class AuthService {
     verifyEmail(token: string): Observable<void> {
         return this.http.post<void>(`${this.apiUrl}/verify-email`, { token });
     }
+
+    /**
+     * Allows other services/pages to push an updated UserProfile into the
+     * signal — used by AccountPage after a successful PATCH /users/me so the
+     * navbar display name updates immediately without a page reload.
+     */
+    setCurrentUser(user: UserProfile): void {
+        this.currentUserSignal.set(user);
+    }
     // ============================================================
     // Private helpers
     // ============================================================

@@ -1,0 +1,177 @@
+<div class="min-h-screen bg-background">
+  <div class="max-w-4xl mx-auto px-4 py-10">
+
+    <!-- Page heading -->
+    <h1 class="text-3xl font-bold text-text mb-8">Your Cart</h1>
+
+    <!-- ───────────── Loading skeleton ───────────── -->
+    @if (loading() && cartService.cartSignal() === null) {
+    <div class="space-y-4 animate-pulse">
+      @for (i of [1, 2, 3]; track i) {
+      <div class="bg-surface border border-border rounded-lg p-5 flex gap-4">
+        <div class="w-16 h-16 bg-background rounded-md shrink-0"></div>
+        <div class="flex-1 space-y-2 pt-1">
+          <div class="h-4 bg-background rounded w-1/2"></div>
+          <div class="h-3 bg-background rounded w-1/4"></div>
+        </div>
+        <div class="h-8 w-24 bg-background rounded self-center"></div>
+      </div>
+      }
+    </div>
+    }
+
+    <!-- ───────────── Error banner ───────────── -->
+    @if (error()) {
+    <div role="alert"
+      class="flex items-center gap-2 text-sm font-medium text-destructive bg-surface border border-destructive rounded-md px-4 py-3 mb-6">
+      <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 9v2m0 4h.01M12 3a9 9 0 100 18A9 9 0 0012 3z" />
+      </svg>
+      {{ error() }}
+    </div>
+    }
+
+    <!-- ───────────── Empty cart ───────────── -->
+    @if (!loading() && cartService.cartSignal()?.items?.length === 0) {
+    <div class="bg-surface border border-border rounded-lg p-16 text-center">
+      <div class="text-6xl mb-4">🛒</div>
+      <h2 class="text-xl font-semibold text-text mb-3">Your cart is empty</h2>
+      <p class="text-text-muted mb-8">
+        Looks like you haven't added anything yet. Browse our catalog to find something you'll love.
+      </p>
+      <a routerLink="/products"
+        class="bg-primary hover:bg-primary-hover text-white px-6 py-3 rounded-md font-medium transition">
+        Browse Products
+      </a>
+    </div>
+    }
+
+    <!-- ───────────── Cart items + summary ───────────── -->
+    @if (cartService.cartSignal(); as cart) {
+    @if (cart.items.length > 0) {
+    <div class="flex flex-col lg:flex-row gap-8">
+
+      <!-- Item list -->
+      <div class="flex-1 space-y-4">
+
+        @for (item of cart.items; track item.productId) {
+        <div class="bg-surface border border-border rounded-lg p-5" [class.opacity-60]="isItemLoading(item.productId)">
+
+          <div class="flex items-start gap-4">
+
+            <!-- Placeholder avatar -->
+            <div class="w-14 h-14 rounded-md bg-background flex items-center justify-center shrink-0">
+              <span class="text-xl font-bold text-primary select-none">
+                {{ item.name.charAt(0).toUpperCase() }}
+              </span>
+            </div>
+
+            <!-- Name + unit price -->
+            <div class="flex-1 min-w-0">
+              <p class="text-base font-semibold text-text leading-snug truncate">
+                {{ item.name }}
+              </p>
+              <p class="text-sm text-text-muted mt-0.5">
+                {{ item.price | currency }} each
+              </p>
+            </div>
+
+            <!-- Remove button -->
+            <button type="button" (click)="onRemoveItem(item.productId)"
+              [disabled]="isItemLoading(item.productId) || loading()" aria-label="Remove {{ item.name }} from cart"
+              class="text-text-muted hover:text-destructive disabled:opacity-40 disabled:cursor-not-allowed transition p-1 shrink-0">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Quantity stepper + line subtotal -->
+          <div class="flex items-center justify-between mt-4 pl-[4.5rem]">
+            <div class="inline-flex items-center border border-border rounded-md overflow-hidden">
+              <button type="button" (click)="onUpdateQuantity(item.productId, item.quantity - 1)"
+                [disabled]="item.quantity <= 1 || isItemLoading(item.productId) || loading()"
+                aria-label="Decrease quantity"
+                class="px-3 py-1.5 text-text-muted hover:text-primary hover:bg-background disabled:opacity-40 disabled:cursor-not-allowed transition text-base leading-none">
+                −
+              </button>
+              <span class="px-4 py-1.5 text-sm text-text font-medium min-w-[2.5rem] text-center border-x border-border">
+                @if (isItemLoading(item.productId)) {
+                <span
+                  class="inline-block w-3 h-3 rounded-full border-2 border-primary border-t-transparent animate-spin"></span>
+                } @else {
+                {{ item.quantity }}
+                }
+              </span>
+              <button type="button" (click)="onUpdateQuantity(item.productId, item.quantity + 1)"
+                [disabled]="isItemLoading(item.productId) || loading()" aria-label="Increase quantity"
+                class="px-3 py-1.5 text-text-muted hover:text-primary hover:bg-background disabled:opacity-40 disabled:cursor-not-allowed transition text-base leading-none">
+                +
+              </button>
+            </div>
+
+            <span class="text-base font-semibold text-text">
+              {{ item.subtotal | currency }}
+            </span>
+          </div>
+
+        </div>
+        }
+
+        <!-- Clear cart -->
+        <div class="flex justify-end pt-2">
+          <button type="button" (click)="onClearCart()" [disabled]="loading()"
+            class="text-sm text-text-muted hover:text-destructive disabled:opacity-40 disabled:cursor-not-allowed transition">
+            Clear cart
+          </button>
+        </div>
+      </div>
+
+      <!-- ───── Order summary ───── -->
+      <aside class="w-full lg:w-72 shrink-0">
+        <div class="bg-surface border border-border rounded-lg p-6 sticky top-24">
+          <h2 class="text-lg font-semibold text-text mb-4">Order Summary</h2>
+
+          <dl class="space-y-2 text-sm mb-6">
+            @for (item of cart.items; track item.productId) {
+            <div class="flex justify-between text-text-muted">
+              <dt class="truncate pr-2">{{ item.name }} × {{ item.quantity }}</dt>
+              <dd class="shrink-0">{{ item.subtotal | currency }}</dd>
+            </div>
+            }
+            <div class="border-t border-border pt-3 mt-3 flex justify-between font-semibold text-text text-base">
+              <dt>Total</dt>
+              <dd>{{ cart.total | currency }}</dd>
+            </div>
+          </dl>
+
+          <!-- Proceed to checkout -->
+          <button type="button" (click)="onProceedToCheckout()"
+            [disabled]="cart.items.length === 0 || loading() || checkoutLoading()"
+            class="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white px-6 py-3 rounded-md font-medium transition disabled:opacity-50 disabled:cursor-not-allowed">
+            @if (checkoutLoading()) {
+            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+            </svg>
+            Placing Order…
+            } @else {
+            Proceed to Checkout
+            }
+          </button>
+
+          <a routerLink="/products"
+            class="block text-center mt-4 text-sm text-text-muted hover:text-primary transition">
+            ← Continue Shopping
+          </a>
+        </div>
+      </aside>
+
+    </div>
+    }
+    }
+
+  </div>
+</div>
