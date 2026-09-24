@@ -15,6 +15,20 @@ export interface Product {
 }
 
 /**
+ * Payload for POST /products and PATCH /products/:id.
+ * Mirrors CreateProductDto / UpdateProductDto on the backend.
+ * price is sent as a NUMBER on write (backend @IsNumber) even though it
+ * comes back as a string on read (Prisma Decimal → JSON serialization).
+ */
+export interface CreateProductPayload {
+    name: string;
+    description: string;
+    price: number;
+    stock: number;
+    categoryId: string;
+}
+
+/**
  * Query parameters for GET /products.
  * All optional — the backend omits filters when not provided.
  */

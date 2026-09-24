@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import type {
+    CreateProductPayload,
     PaginatedProducts,
     Product,
     ProductQuery,
@@ -33,5 +34,22 @@ export class ProductsService {
 
     getProduct(id: string): Observable<Product> {
         return this.http.get<Product>(`${this.apiUrl}/${id}`);
+    }
+
+    // ---------- Admin write methods ----------
+
+    /** POST /products — requires JWT + ADMIN role. */
+    createProduct(data: CreateProductPayload): Observable<Product> {
+        return this.http.post<Product>(this.apiUrl, data);
+    }
+
+    /** PATCH /products/:id — requires JWT + ADMIN role. */
+    updateProduct(id: string, data: Partial<CreateProductPayload>): Observable<Product> {
+        return this.http.patch<Product>(`${this.apiUrl}/${id}`, data);
+    }
+
+    /** DELETE /products/:id — requires JWT + ADMIN role. Returns 204 no content. */
+    deleteProduct(id: string): Observable<void> {
+        return this.http.delete<void>(`${this.apiUrl}/${id}`);
     }
 }

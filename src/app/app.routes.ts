@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { AppLayout } from './shared/layout/app-layout/app-layout';
 import { authGuard } from './core/guards/auth.guard';
+import { adminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
     // ----- Auth pages (fullscreen, no navbar/footer) -----
@@ -82,6 +83,58 @@ export const routes: Routes = [
                 loadComponent: () =>
                     import('./features/account/account.page').then(
                         (m) => m.AccountPage,
+                    ),
+            },
+
+            // ----- Admin routes -----
+            {
+                path: 'admin/products',
+                canActivate: [authGuard, adminGuard],
+                loadComponent: () =>
+                    import('./features/admin/admin-products/admin-products.page').then(
+                        (m) => m.AdminProductsPage,
+                    ),
+            },
+            {
+                path: 'admin/products/new',
+                canActivate: [authGuard, adminGuard],
+                loadComponent: () =>
+                    import('./features/admin/admin-product-form/admin-product-form.page').then(
+                        (m) => m.AdminProductFormPage,
+                    ),
+            },
+            {
+                path: 'admin/products/:id/edit',
+                canActivate: [authGuard, adminGuard],
+                loadComponent: () =>
+                    import('./features/admin/admin-product-form/admin-product-form.page').then(
+                        (m) => m.AdminProductFormPage,
+                    ),
+            },
+
+            // ----- Admin category routes -----
+            {
+                path: 'admin/categories',
+                canActivate: [authGuard, adminGuard],
+                loadComponent: () =>
+                    import('./features/admin/admin-categories/admin-categories.page').then(
+                        (m) => m.AdminCategoriesPage,
+                    ),
+            },
+            {
+                path: 'admin/categories/new',
+                canActivate: [authGuard, adminGuard],
+                loadComponent: () =>
+                    import('./features/admin/admin-category-form/admin-category-form.page').then(
+                        (m) => m.AdminCategoryFormPage,
+                    ),
+            },
+            {
+                path: 'admin/categories/:id/edit',
+                canActivate: [authGuard, adminGuard],
+                loadComponent: () =>
+                    import('./features/admin/admin-category-form/admin-category-form.page').then(
+                        (m) => m.AdminCategoryFormPage,
                     ),
             },
         ],

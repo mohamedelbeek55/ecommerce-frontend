@@ -1,0 +1,147 @@
+<div class="min-h-screen bg-background">
+  <div class="max-w-7xl mx-auto px-4 py-10">
+
+    <!-- Admin sub-nav tabs -->
+    <div class="flex items-center gap-1 mb-8 border-b border-border">
+      <a routerLink="/admin/products"
+        class="px-4 py-2 text-sm font-medium text-primary border-b-2 border-primary -mb-px">
+        Products
+      </a>
+      <a routerLink="/admin/categories"
+        class="px-4 py-2 text-sm font-medium text-text-muted hover:text-text transition border-b-2 border-transparent hover:border-border -mb-px">
+        Categories
+      </a>
+    </div>
+
+    <!-- Header -->
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+      <div>
+        <h1 class="text-3xl font-bold text-text">Products</h1>
+        @if (!loading()) {
+        <p class="text-text-muted mt-1">{{ total() }} product{{ total() === 1 ? '' : 's' }} total</p>
+        }
+      </div>
+      <a routerLink="/admin/products/new"
+        class="bg-primary hover:bg-primary-hover text-white px-5 py-2 rounded-md font-medium transition text-sm">
+        + New Product
+      </a>
+    </div>
+
+    <!-- Error banner -->
+    @if (error()) {
+    <div role="alert"
+      class="flex items-center gap-2 text-sm font-medium text-destructive border border-destructive bg-surface rounded-md px-4 py-3 mb-6">
+      <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 9v2m0 4h.01M12 3a9 9 0 100 18A9 9 0 0012 3z" />
+      </svg>
+      {{ error() }}
+    </div>
+    }
+
+    <!-- Loading skeleton -->
+    @if (loading()) {
+    <div class="bg-surface border border-border rounded-lg overflow-hidden animate-pulse">
+      @for (i of [1,2,3,4,5]; track i) {
+      <div class="flex items-center gap-4 px-6 py-4 border-b border-border last:border-0">
+        <div class="h-4 bg-background rounded w-1/4"></div>
+        <div class="h-4 bg-background rounded w-1/6"></div>
+        <div class="h-4 bg-background rounded w-1/8"></div>
+        <div class="h-4 bg-background rounded w-12 ml-auto"></div>
+      </div>
+      }
+    </div>
+    }
+
+    <!-- Products table -->
+    @if (!loading() && products().length > 0) {
+    <div class="bg-surface border border-border rounded-lg overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-border bg-background text-left">
+            <th class="px-4 py-3 font-semibold text-text-muted uppercase tracking-wide text-xs">Name</th>
+            <th class="px-4 py-3 font-semibold text-text-muted uppercase tracking-wide text-xs">Category</th>
+            <th class="px-4 py-3 font-semibold text-text-muted uppercase tracking-wide text-xs">Price</th>
+            <th class="px-4 py-3 font-semibold text-text-muted uppercase tracking-wide text-xs">Stock</th>
+            <th class="px-4 py-3 font-semibold text-text-muted uppercase tracking-wide text-xs text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (product of products(); track product.id) {
+          <tr class="border-b border-border last:border-0 hover:bg-background transition-colors">
+            <td class="px-4 py-3 font-medium text-text max-w-xs truncate">
+              {{ product.name }}
+            </td>
+            <td class="px-4 py-3 text-text-muted">
+              {{ getCategoryName(product.categoryId) }}
+            </td>
+            <td class="px-4 py-3 text-text">
+              {{ product.price | currency }}
+            </td>
+            <td class="px-4 py-3">
+              @if (product.stock === 0) {
+              <span class="text-xs font-medium text-destructive">Out of stock</span>
+              } @else {
+              <span class="text-text">{{ product.stock }}</span>
+              }
+            </td>
+            <td class="px-4 py-3 text-right">
+              <div class="inline-flex items-center gap-2">
+                <a [routerLink]="['/admin/products', product.id, 'edit']"
+                  class="text-xs font-medium border border-border text-text-muted hover:border-primary hover:text-primary px-3 py-1.5 rounded-md transition">
+                  Edit
+                </a>
+                <button type="button" (click)="onDelete(product)" [disabled]="isDeleting(product.id)"
+                  class="text-xs font-medium border border-border text-destructive hover:border-destructive disabled:opacity-40 disabled:cursor-not-allowed px-3 py-1.5 rounded-md transition">
+                  @if (isDeleting(product.id)) {
+                  <span
+                    class="inline-block w-3 h-3 rounded-full border-2 border-destructive border-t-transparent animate-spin"></span>
+                  } @else {
+                  Delete
+                  }
+                </button>
+              </div>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (totalPages() > 1) {
+    <nav aria-label="Admin products pagination" class="mt-8 flex items-center justify-center gap-1">
+      <button type="button" [disabled]="page() === 1" (click)="onPageChange(page() - 1)"
+        class="px-3 py-2 rounded-md border border-border text-sm text-text-muted hover:border-primary hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed transition">
+        ← Prev
+      </button>
+      @for (p of [].constructor(totalPages()); track $index) {
+      <button type="button" (click)="onPageChange($index + 1)"
+        [class]="($index + 1) === page()
+                ? 'w-9 h-9 rounded-md border border-primary bg-primary text-white text-sm font-medium'
+                : 'w-9 h-9 rounded-md border border-border text-sm text-text-muted hover:border-primary hover:text-primary transition'">
+        {{ $index + 1 }}
+      </button>
+      }
+      <button type="button" [disabled]="page() === totalPages()" (click)="onPageChange(page() + 1)"
+        class="px-3 py-2 rounded-md border border-border text-sm text-text-muted hover:border-primary hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed transition">
+        Next →
+      </button>
+    </nav>
+    }
+    }
+
+    <!-- Empty state -->
+    @if (!loading() && products().length === 0 && !error()) {
+    <div class="bg-surface border border-border rounded-lg p-16 text-center">
+      <div class="text-5xl mb-4">📦</div>
+      <h2 class="text-xl font-semibold text-text mb-3">No products yet</h2>
+      <a routerLink="/admin/products/new"
+        class="inline-block bg-primary hover:bg-primary-hover text-white px-6 py-3 rounded-md font-medium transition">
+        Add First Product
+      </a>
+    </div>
+    }
+
+  </div>
+</div>

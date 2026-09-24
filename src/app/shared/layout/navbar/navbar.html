@@ -57,6 +57,12 @@
                             class="block px-4 py-2 text-sm text-text-muted hover:text-text hover:bg-background transition">
                             My Orders
                         </a>
+                        @if (currentUser()?.role === 'ADMIN') {
+                        <a routerLink="/admin/products" (click)="closeAllMenus()"
+                            class="block px-4 py-2 text-sm text-primary font-medium hover:bg-background transition">
+                            Admin
+                        </a>
+                        }
                         <button type="button" (click)="logout()"
                             class="block w-full text-left px-4 py-2 text-sm text-destructive hover:bg-background transition">
                             Log out
@@ -115,6 +121,12 @@
                     class="block text-text-muted hover:text-text transition mb-2 text-sm">
                     My Orders
                 </a>
+                @if (currentUser()?.role === 'ADMIN') {
+                <a routerLink="/admin/products" (click)="closeAllMenus()"
+                    class="block text-primary font-medium transition mb-2 text-sm">
+                    Admin
+                </a>
+                }
                 <button type="button" (click)="logout()" class="block w-full text-left text-destructive text-sm">
                     Log out
                 </button>
