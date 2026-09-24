@@ -22,6 +22,20 @@ export const routes: Routes = [
                 (m) => m.VerifyEmailPage,
             ),
     },
+    {
+        path: 'forgot-password',
+        loadComponent: () =>
+            import('./features/auth/forgot-password/forgot-password.page').then(
+                (m) => m.ForgotPasswordPage,
+            ),
+    },
+    {
+        path: 'reset-password',
+        loadComponent: () =>
+            import('./features/auth/reset-password/reset-password.page').then(
+                (m) => m.ResetPasswordPage,
+            ),
+    },
 
     // ----- App pages (with navbar/footer via AppLayout) -----
     {
@@ -32,6 +46,16 @@ export const routes: Routes = [
                 path: '',
                 loadComponent: () =>
                     import('./features/home/home.page').then((m) => m.HomePage),
+            },
+            {
+                path: 'about',
+                loadComponent: () =>
+                    import('./features/about/about.page').then((m) => m.AboutPage),
+            },
+            {
+                path: 'contact',
+                loadComponent: () =>
+                    import('./features/contact/contact.page').then((m) => m.ContactPage),
             },
             {
                 path: 'products',

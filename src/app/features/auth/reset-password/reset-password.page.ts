@@ -8,7 +8,6 @@ import {
 } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-import { sanitizeReturnUrl } from '../../../shared/utils/return-url.util';
 import type { NormalizedError } from '../../../core/interceptors/error.interceptor';
 
 const STRONG_PASSWORD_PATTERN =
@@ -27,33 +26,30 @@ function passwordsMatchValidator(
   return password === confirmPassword ? null : { passwordsMismatch: true };
 }
 
+type PageState = 'form' | 'success' | 'token-error';
+
 @Component({
-  selector: 'app-register-page',
+  selector: 'app-reset-password-page',
   imports: [ReactiveFormsModule, RouterLink],
-  templateUrl: './register.page.html',
-  styleUrl: './register.page.scss',
+  templateUrl: './reset-password.page.html',
+  styleUrl: './reset-password.page.scss',
 })
-export class RegisterPage implements OnInit {
+export class ResetPasswordPage implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
 
-  private returnUrl: string | null = null;
+  private resetToken: string | null = null;
+
+  readonly state = signal<PageState>('form');
+  readonly loading = signal(false);
+  readonly errors = signal<string[]>([]);
+
+  readonly showPassword = signal(false);
+  readonly showConfirmPassword = signal(false);
 
   readonly form = this.fb.group(
     {
-      name: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(2),
-          Validators.maxLength(50),
-        ],
-      ],
-      email: [
-        '',
-        [Validators.required, Validators.email, Validators.maxLength(255)],
-      ],
       password: [
         '',
         [Validators.required, Validators.pattern(STRONG_PASSWORD_PATTERN)],
@@ -63,46 +59,40 @@ export class RegisterPage implements OnInit {
     { validators: passwordsMatchValidator },
   );
 
-  readonly loading = signal(false);
-  readonly errors = signal<string[]>([]);
-  readonly success = signal(false);
-
-  readonly showPassword = signal(false);
-  readonly showConfirmPassword = signal(false);
-
   ngOnInit(): void {
-    this.returnUrl = sanitizeReturnUrl(
-      this.route.snapshot.queryParamMap.get('returnUrl'),
-    );
-  }
+    this.resetToken = this.route.snapshot.queryParamMap.get('token');
 
-  get loginQueryParams(): { returnUrl: string } | null {
-    return this.returnUrl ? { returnUrl: this.returnUrl } : null;
+    if (!this.resetToken) {
+      this.state.set('token-error');
+      this.errors.set([
+        'Missing reset token. Please use the link from your email.',
+      ]);
+    }
   }
 
   onSubmit(): void {
-    if (this.form.invalid) {
+    if (!this.resetToken || this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
 
     this.loading.set(true);
     this.errors.set([]);
-    this.success.set(false);
 
-    const { name, email, password } = this.form.getRawValue();
+    const { password } = this.form.getRawValue();
 
-    const trimmedEmail = email!.trim().toLowerCase();
-    const trimmedName = name!.trim();
-
-    this.authService.register(trimmedEmail, password!, trimmedName).subscribe({
+    this.authService.resetPassword(this.resetToken, password!).subscribe({
       next: () => {
         this.loading.set(false);
-        this.success.set(true);
+        this.state.set('success');
       },
       error: (err: NormalizedError) => {
         this.loading.set(false);
-        this.errors.set(err.messages);
+        this.errors.set(
+          err.messages.length > 0
+            ? err.messages
+            : ['This reset link is invalid or has expired.'],
+        );
       },
     });
   }
@@ -113,14 +103,6 @@ export class RegisterPage implements OnInit {
 
   toggleConfirmPasswordVisibility(): void {
     this.showConfirmPassword.update((v) => !v);
-  }
-
-  get nameControl() {
-    return this.form.controls.name;
-  }
-
-  get emailControl() {
-    return this.form.controls.email;
   }
 
   get passwordControl() {
@@ -137,5 +119,4 @@ export class RegisterPage implements OnInit {
       !!this.confirmPasswordControl.touched
     );
   }
-
 }

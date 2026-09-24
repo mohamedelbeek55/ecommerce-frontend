@@ -1,0 +1,43 @@
+<div class="min-h-screen bg-background">
+  <div class="max-w-2xl mx-auto px-4 py-16">
+
+    <h1 class="text-3xl font-bold text-text mb-8">About This Project</h1>
+
+    <div class="bg-surface border border-border rounded-lg p-8 space-y-5">
+
+      <p class="text-text leading-relaxed">
+        ShopEase is a full-stack e-commerce portfolio project built to demonstrate
+        end-to-end web application development — from a NestJS REST API with Prisma and
+        PostgreSQL on the backend, to an Angular 21 frontend with Stripe payment
+        integration.
+      </p>
+
+      <p class="text-text leading-relaxed">
+        Features include product browsing and filtering, a persistent shopping cart,
+        authenticated checkout via Stripe Elements, order history, and an admin panel
+        for managing products and categories. Authentication uses JWT access and refresh
+        tokens with email verification.
+      </p>
+
+      <p class="text-text leading-relaxed">
+        This is a portfolio demo — no real goods are sold and no real payments are
+        processed. Stripe is configured in test mode; use card number
+        <span class="font-mono text-sm bg-background border border-border rounded px-1.5 py-0.5">4242 4242 4242 4242</span>
+        with any future expiry and any CVC to simulate a successful payment.
+      </p>
+
+    </div>
+
+    <div class="mt-8 flex items-center gap-4">
+      <a routerLink="/products"
+         class="bg-primary hover:bg-primary-hover text-white px-6 py-2 rounded-md font-medium transition text-sm">
+        Browse Products
+      </a>
+      <a routerLink="/contact"
+         class="border border-border text-text-muted hover:border-primary hover:text-primary px-6 py-2 rounded-md font-medium transition text-sm">
+        Contact
+      </a>
+    </div>
+
+  </div>
+</div>

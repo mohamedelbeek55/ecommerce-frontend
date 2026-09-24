@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { ProductsService } from '../../../core/services/products.service';
 import { CartService } from '../../../core/services/cart.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { loginQueryParamsWithReturnUrl } from '../../../shared/utils/return-url.util';
 import type { Product } from '../../../core/models/product.model';
 import type { NormalizedError } from '../../../core/interceptors/error.interceptor';
 
@@ -77,7 +78,9 @@ export class ProductDetailPage implements OnInit {
 
         // Cart requires authentication — redirect to login if not signed in.
         if (!this.authService.isAuthenticated()) {
-            this.router.navigate(['/login']);
+            void this.router.navigate(['/login'], {
+                queryParams: loginQueryParamsWithReturnUrl(this.router.url),
+            });
             return;
         }
 

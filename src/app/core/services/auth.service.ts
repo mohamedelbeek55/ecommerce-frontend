@@ -1,4 +1,4 @@
-import { Injectable, inject, signal, computed } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { tap, finalize } from 'rxjs/operators';
@@ -36,9 +36,7 @@ export class AuthService {
     // ============================================================
     private readonly currentUserSignal = signal<UserProfile | null>(null);
     readonly currentUser = this.currentUserSignal.asReadonly();
-    readonly isAuthenticated = computed(
-        () => !!this.tokenStorage.getAccessToken(),
-    );
+    readonly isAuthenticated = this.tokenStorage.hasAccessToken;
 
     // ============================================================
     // Public API
@@ -105,6 +103,24 @@ export class AuthService {
     }
     verifyEmail(token: string): Observable<void> {
         return this.http.post<void>(`${this.apiUrl}/verify-email`, { token });
+    }
+
+    /** POST /auth/forgot-password — always 204 (no email enumeration). */
+    forgotPassword(email: string): Observable<void> {
+        return this.http.post<void>(`${this.apiUrl}/forgot-password`, { email });
+    }
+
+    /** POST /auth/reset-password — invalidates all sessions on success. */
+    resetPassword(token: string, newPassword: string): Observable<void> {
+        return this.http.post<void>(`${this.apiUrl}/reset-password`, {
+            token,
+            newPassword,
+        });
+    }
+
+    /** POST /auth/resend-verification — always 204 (no email enumeration). */
+    resendVerification(email: string): Observable<void> {
+        return this.http.post<void>(`${this.apiUrl}/resend-verification`, { email });
     }
 
     /**

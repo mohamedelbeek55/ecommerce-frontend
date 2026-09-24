@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal, effect, untracked } from '@angular/core';
-import { CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
+import { ProductCard } from '../../../shared/components/product-card/product-card';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { ProductsService } from '../../../core/services/products.service';
 import { CategoriesService } from '../../../core/services/categories.service';
@@ -11,13 +11,14 @@ import type { NormalizedError } from '../../../core/interceptors/error.intercept
 
 @Component({
     selector: 'app-product-list-page',
-    imports: [CurrencyPipe, FormsModule, RouterLink],
+    imports: [FormsModule, ProductCard],
     templateUrl: './product-list.page.html',
     styleUrl: './product-list.page.scss',
 })
 export class ProductListPage implements OnInit {
     private readonly productsService = inject(ProductsService);
     private readonly categoriesService = inject(CategoriesService);
+    private readonly route = inject(ActivatedRoute);
 
     // ---------- Filter state (signals) ----------
     readonly searchTerm = signal('');
@@ -59,6 +60,16 @@ export class ProductListPage implements OnInit {
     }
 
     ngOnInit(): void {
+        const categoryId = this.route.snapshot.queryParamMap.get('categoryId');
+        if (categoryId) {
+            this.selectedCategoryId.set(categoryId);
+        }
+
+        const search = this.route.snapshot.queryParamMap.get('search');
+        if (search?.trim()) {
+            this.searchTerm.set(search.trim());
+        }
+
         this.categoriesService.getCategories().subscribe({
             next: (cats) => this.categories.set(cats),
             error: () => this.categories.set([]),
@@ -140,11 +151,6 @@ export class ProductListPage implements OnInit {
 
         for (let i = start; i <= end; i++) pages.push(i);
         return pages;
-    }
-
-    /** Returns the first letter of the product name for the placeholder avatar. */
-    getInitials(name: string): string {
-        return name.charAt(0).toUpperCase();
     }
 
     /** Resolves a categoryId to its display name; returns null if not found (template @if hides it). */

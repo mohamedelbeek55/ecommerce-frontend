@@ -1,17 +1,16 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+import { CanActivateFn, Router, RouterStateSnapshot } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
 /**
- * Route guard that protects routes requiring authentication.
+ * Route guard for routes that require authentication.
  *
- * If the user is authenticated → allow navigation.
- * If not → redirect to `/login` (route does not exist yet — will be created
- * in the next iteration, before this guard is actually applied to any route).
+ * Authenticated users proceed; others are redirected to `/login` with the
+ * attempted URL preserved as `returnUrl` so login can send them back afterward.
  *
- * Not applied to any route yet — this file is prepared for future use.
+ * Applied to cart, checkout, orders, account, and admin routes.
  */
-export const authGuard: CanActivateFn = () => {
+export const authGuard: CanActivateFn = (_route, state: RouterStateSnapshot) => {
     const authService = inject(AuthService);
     const router = inject(Router);
 
@@ -19,5 +18,7 @@ export const authGuard: CanActivateFn = () => {
         return true;
     }
 
-    return router.createUrlTree(['/login']);
+    return router.createUrlTree(['/login'], {
+        queryParams: { returnUrl: state.url },
+    });
 };

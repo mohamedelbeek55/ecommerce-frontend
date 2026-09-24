@@ -10,10 +10,26 @@
             </div>
 
             <!-- Error messages -->
+            @if (resendVerificationMessage()) {
+            <div class="mb-4 p-4 border border-primary rounded-md bg-primary/5" role="status">
+                <p class="text-text text-sm">{{ resendVerificationMessage() }}</p>
+            </div>
+            }
+
             @if (errors().length > 0) {
             <div class="mb-4 p-3 border border-destructive rounded-md bg-destructive/5" role="alert">
                 @for (message of errors(); track message) {
                 <p class="text-destructive text-sm">{{ message }}</p>
+                }
+                @if (emailNotVerified()) {
+                <button type="button" (click)="resendVerificationEmail()" [disabled]="resendLoading()"
+                    class="mt-3 text-sm font-medium text-primary hover:text-primary-hover transition disabled:opacity-50">
+                    @if (resendLoading()) {
+                    Sending verification email…
+                    } @else {
+                    Resend verification email
+                    }
+                </button>
                 }
             </div>
             }
@@ -41,9 +57,15 @@
 
                 <!-- Password field -->
                 <div>
-                    <label for="password" class="block text-sm font-medium text-text mb-1">
-                        Password
-                    </label>
+                    <div class="flex items-center justify-between mb-1">
+                        <label for="password" class="block text-sm font-medium text-text">
+                            Password
+                        </label>
+                        <a routerLink="/forgot-password"
+                            class="text-xs font-medium text-primary hover:text-primary-hover transition">
+                            Forgot password?
+                        </a>
+                    </div>
                     <div class="relative">
                         <input id="password" [type]="showPassword() ? 'text' : 'password'" formControlName="password"
                             autocomplete="current-password"
@@ -94,7 +116,8 @@
             <!-- Footer links -->
             <div class="mt-6 text-center text-sm text-text-muted">
                 Don't have an account?
-                <a routerLink="/register" class="text-primary hover:text-primary-hover font-medium">
+                <a routerLink="/register" [queryParams]="registerQueryParams"
+                    class="text-primary hover:text-primary-hover font-medium">
                     Create one
                 </a>
             </div>

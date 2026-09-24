@@ -14,13 +14,12 @@ export class Navbar {
     private readonly router = inject(Router);
     readonly cartService = inject(CartService);
 
-    /** Expose signals from AuthService to the template. */
     readonly isAuthenticated = this.authService.isAuthenticated;
     readonly currentUser = this.authService.currentUser;
 
-    /** UI state for the two dropdowns (signals → reactive templates). */
     readonly mobileMenuOpen = signal(false);
     readonly userMenuOpen = signal(false);
+    readonly searchQuery = signal('');
 
     toggleMobileMenu(): void {
         this.mobileMenuOpen.update((v) => !v);
@@ -35,8 +34,20 @@ export class Navbar {
         this.userMenuOpen.set(false);
     }
 
+    onSearchSubmit(event: Event): void {
+        event.preventDefault();
+        const q = this.searchQuery().trim();
+        this.closeAllMenus();
+        this.searchQuery.set('');
+
+        if (q) {
+            void this.router.navigate(['/products'], { queryParams: { search: q } });
+        } else {
+            void this.router.navigate(['/products']);
+        }
+    }
+
     logout(): void {
-        // The service always clears local tokens (finalize), so navigate either way.
         this.authService.logout().subscribe({
             next: () => this.handleLogoutComplete(),
             error: () => this.handleLogoutComplete(),
@@ -48,7 +59,6 @@ export class Navbar {
         this.router.navigate(['/']);
     }
 
-    /** Display name for the user menu — fallback while profile is loading. */
     getUserDisplayName(): string {
         return this.currentUser()?.name ?? 'Account';
     }

@@ -1,7 +1,8 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { sanitizeReturnUrl } from '../../../shared/utils/return-url.util';
 import type { NormalizedError } from '../../../core/interceptors/error.interceptor';
 
 @Component({
@@ -10,30 +11,37 @@ import type { NormalizedError } from '../../../core/interceptors/error.intercept
   templateUrl: './login.page.html',
   styleUrl: './login.page.scss',
 })
-export class LoginPage {
+export class LoginPage implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
-  readonly showPassword = signal(false);
+  private readonly route = inject(ActivatedRoute);
 
-  /** Reactive form with email + password. */
+  readonly showPassword = signal(false);
+  private returnUrl: string | null = null;
+
   readonly form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(8)]],
   });
 
-  /** UI state — using signals so Angular reactively updates the template. */
   readonly loading = signal(false);
   readonly errors = signal<string[]>([]);
+  readonly emailNotVerified = signal(false);
+  readonly resendLoading = signal(false);
+  readonly resendVerificationMessage = signal<string | null>(null);
 
-  /**
-   * Handle form submission.
-   * - Show loading state
-   * - Call authService.login()
-   * - On success: navigate to home
-   * - On 403: show a specific "verify your email" message
-   * - On other errors: display the normalized messages
-   */
+  ngOnInit(): void {
+    this.returnUrl = sanitizeReturnUrl(
+      this.route.snapshot.queryParamMap.get('returnUrl'),
+    );
+  }
+
+  /** Query params forwarded to register so returnUrl survives the auth loop. */
+  get registerQueryParams(): { returnUrl: string } | null {
+    return this.returnUrl ? { returnUrl: this.returnUrl } : null;
+  }
+
   onSubmit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -42,23 +50,26 @@ export class LoginPage {
 
     this.loading.set(true);
     this.errors.set([]);
+    this.emailNotVerified.set(false);
+    this.resendVerificationMessage.set(null);
 
     const { email, password } = this.form.getRawValue();
-
-    // Match the backend's @Transform: trim + lowercase email.
     const trimmedEmail = email!.trim().toLowerCase();
 
     this.authService.login(trimmedEmail!, password!).subscribe({
       next: () => {
         this.loading.set(false);
-        // TODO: route to a real home page (currently no home route exists).
-        this.router.navigate(['/']);
+        if (this.returnUrl) {
+          void this.router.navigateByUrl(this.returnUrl);
+        } else {
+          void this.router.navigate(['/']);
+        }
       },
       error: (err: NormalizedError) => {
         this.loading.set(false);
 
-        // 403 = email not verified. Show a distinct, helpful message.
         if (err.statusCode === 403) {
+          this.emailNotVerified.set(true);
           this.errors.set([
             'Your email address is not verified yet.',
             'Please check your inbox for the verification link, then try again.',
@@ -66,15 +77,41 @@ export class LoginPage {
           return;
         }
 
-        // Otherwise, show whatever the backend returned (already normalized).
         this.errors.set(err.messages);
       },
     });
   }
+
+  resendVerificationEmail(): void {
+    const email = this.form.controls.email.value?.trim().toLowerCase();
+    if (!email) {
+      this.form.controls.email.markAsTouched();
+      return;
+    }
+
+    this.resendLoading.set(true);
+    this.resendVerificationMessage.set(null);
+
+    this.authService.resendVerification(email).subscribe({
+      next: () => {
+        this.resendLoading.set(false);
+        this.resendVerificationMessage.set(
+          'Verification email sent, please check your inbox.',
+        );
+      },
+      error: () => {
+        this.resendLoading.set(false);
+        this.resendVerificationMessage.set(
+          'Verification email sent, please check your inbox.',
+        );
+      },
+    });
+  }
+
   togglePasswordVisibility(): void {
     this.showPassword.update((v) => !v);
   }
-  /** Convenience getters used in the template for validation feedback. */
+
   get emailControl() {
     return this.form.controls.email;
   }
@@ -82,4 +119,5 @@ export class LoginPage {
   get passwordControl() {
     return this.form.controls.password;
   }
+
 }
