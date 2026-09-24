@@ -30,8 +30,8 @@
     <div class="flex flex-col lg:flex-row gap-8">
 
       <!-- ── Left: payment form ── -->
-      <div class="flex-1 space-y-6">
-        <div class="bg-surface border border-border rounded-lg p-8">
+      <div class="flex-1 min-w-0 space-y-6">
+        <div class="bg-surface border border-border rounded-lg p-4 sm:p-8">
           <h2 class="text-lg font-semibold text-text mb-6">Payment</h2>
 
           <!-- Payment intent loading -->
@@ -73,7 +73,7 @@
           @if (elementsReady() && !paymentSuccess()) {
           <div class="space-y-6">
             <!-- Mount point — Stripe injects its iframe here -->
-            <div #paymentElement id="payment-element"></div>
+            <div #paymentElement id="payment-element" class="w-full max-w-full"></div>
 
             <!-- Payment error banner -->
             @if (paymentError()) {

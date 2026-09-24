@@ -37,6 +37,8 @@ export class ProductListPage implements OnInit {
     readonly categories = signal<Category[]>([]);
     readonly loading = signal(false);
     readonly error = signal<string | null>(null);
+    /** Controls the mobile collapsible filters panel. Auto-opens when filters are active. */
+    readonly filtersOpen = signal(false);
 
     // ---------- Search debounce ----------
     // Bridges the raw input value → debounced → triggers a re-fetch.
@@ -82,6 +84,11 @@ export class ProductListPage implements OnInit {
                 this.searchTerm.set(value);
                 this.page.set(1); // Reset to page 1 on a new search
             });
+
+        // Auto-expand the filters panel on mobile if any filter is pre-populated (e.g. from query params).
+        if (this.hasActiveFilters()) {
+            this.filtersOpen.set(true);
+        }
     }
 
     onSearchInput(value: string): void {
@@ -117,6 +124,10 @@ export class ProductListPage implements OnInit {
         if (newPage < 1 || newPage > this.totalPages()) return;
         this.page.set(newPage);
         window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    toggleFilters(): void {
+        this.filtersOpen.update((open) => !open);
     }
 
     clearFilters(): void {

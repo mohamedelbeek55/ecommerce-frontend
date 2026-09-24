@@ -94,7 +94,7 @@
               <button type="button" (click)="onUpdateQuantity(item.productId, item.quantity - 1)"
                 [disabled]="item.quantity <= 1 || isItemLoading(item.productId) || loading()"
                 aria-label="Decrease quantity"
-                class="px-3 py-1.5 text-text-muted hover:text-primary hover:bg-background disabled:opacity-40 disabled:cursor-not-allowed transition text-base leading-none">
+                class="min-h-11 min-w-[2.75rem] flex items-center justify-center px-3 text-text-muted hover:text-primary hover:bg-background disabled:opacity-40 disabled:cursor-not-allowed transition text-base leading-none">
                 −
               </button>
               <span class="px-4 py-1.5 text-sm text-text font-medium min-w-[2.5rem] text-center border-x border-border">
@@ -107,7 +107,7 @@
               </span>
               <button type="button" (click)="onUpdateQuantity(item.productId, item.quantity + 1)"
                 [disabled]="isItemLoading(item.productId) || loading()" aria-label="Increase quantity"
-                class="px-3 py-1.5 text-text-muted hover:text-primary hover:bg-background disabled:opacity-40 disabled:cursor-not-allowed transition text-base leading-none">
+                class="min-h-11 min-w-[2.75rem] flex items-center justify-center px-3 text-text-muted hover:text-primary hover:bg-background disabled:opacity-40 disabled:cursor-not-allowed transition text-base leading-none">
                 +
               </button>
             </div>

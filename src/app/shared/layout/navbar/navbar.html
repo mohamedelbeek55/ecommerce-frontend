@@ -98,7 +98,7 @@
             </div>
 
             <!-- Mobile hamburger -->
-            <button type="button" (click)="toggleMobileMenu()" class="md:hidden text-text p-2 shrink-0"
+            <button type="button" (click)="toggleMobileMenu()" class="md:hidden text-text p-2.5 -mr-2 shrink-0"
                 aria-label="Toggle menu">
                 @if (mobileMenuOpen()) {
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -135,14 +135,15 @@
                 </div>
             </form>
 
-            <a routerLink="/" (click)="closeAllMenus()" class="block text-text-muted hover:text-text transition">
+            <a routerLink="/" (click)="closeAllMenus()"
+                class="block py-2.5 text-text-muted hover:text-text transition">
                 Home
             </a>
             <a routerLink="/products" (click)="closeAllMenus()"
-                class="block text-text-muted hover:text-text transition">
+                class="block py-2.5 text-text-muted hover:text-text transition">
                 Products
             </a>
-            <a routerLink="/cart" (click)="closeAllMenus()" class="block text-text-muted hover:text-text transition">
+            <a routerLink="/cart" (click)="closeAllMenus()" class="block py-2.5 text-text-muted hover:text-text transition">
                 Cart
             </a>
 
@@ -152,25 +153,25 @@
                     {{ getUserDisplayName() }}
                 </div>
                 <a routerLink="/account" (click)="closeAllMenus()"
-                    class="block text-text-muted hover:text-text transition mb-2 text-sm">
+                    class="block text-text-muted hover:text-text transition mb-1 py-2.5 text-sm">
                     My Account
                 </a>
                 <a routerLink="/orders" (click)="closeAllMenus()"
-                    class="block text-text-muted hover:text-text transition mb-2 text-sm">
+                    class="block text-text-muted hover:text-text transition mb-1 py-2.5 text-sm">
                     My Orders
                 </a>
                 @if (currentUser()?.role === 'ADMIN') {
                 <a routerLink="/admin/products" (click)="closeAllMenus()"
-                    class="block text-primary font-medium transition mb-2 text-sm">
+                    class="block text-primary font-medium transition mb-1 py-2.5 text-sm">
                     Admin
                 </a>
                 }
-                <button type="button" (click)="logout()" class="block w-full text-left text-destructive text-sm">
+                <button type="button" (click)="logout()" class="block w-full text-left text-destructive text-sm py-2.5">
                     Log out
                 </button>
                 } @else {
                 <a routerLink="/login" (click)="closeAllMenus()"
-                    class="block text-text-muted hover:text-text transition mb-3">
+                    class="block text-text-muted hover:text-text transition mb-1 py-2.5">
                     Log in
                 </a>
                 <a routerLink="/register" (click)="closeAllMenus()"
