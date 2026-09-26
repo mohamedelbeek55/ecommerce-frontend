@@ -59,6 +59,15 @@ export class LoginPage implements OnInit {
     this.authService.login(trimmedEmail!, password!).subscribe({
       next: () => {
         this.loading.set(false);
+
+        const user = this.authService.currentUser();
+
+
+        if (user?.role === 'ADMIN') {
+          void this.router.navigate(['/admin']);
+          return;
+        }
+
         if (this.returnUrl) {
           void this.router.navigateByUrl(this.returnUrl);
         } else {
