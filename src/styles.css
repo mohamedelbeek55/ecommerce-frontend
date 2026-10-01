@@ -1,4 +1,9 @@
-/* You can add global styles to this file, and also import other style files */
+/* ============================================
+   Google Fonts — must come first before all
+   other @import rules (CSS spec requirement)
+   ============================================ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 /* ============================================
    Tailwind v4 — base import
    ============================================ */
@@ -39,7 +44,7 @@
     --color-destructive: #a94442;
     /* remove/delete */
 
-    /* Typography — system stack */
+    /* Typography — Inter with system fallback */
     --font-sans:
         'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
         'Helvetica Neue', Arial, sans-serif;
@@ -55,9 +60,40 @@ body {
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
 }
 
 body {
     margin: 0;
     min-height: 100dvh;
+}
+
+/* ============================================
+   Focus-visible — keyboard-only focus rings.
+   Mouse clicks do not show an outline;
+   keyboard navigation does.
+   ============================================ */
+:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* ============================================
+   Consistent base transition duration
+   ============================================ */
+*,
+*::before,
+*::after {
+    transition-duration: 150ms;
+}
+
+/* Elements that animate should not inherit
+   the global transition (causes visual glitches) */
+.animate-spin,
+.animate-pulse {
+    transition: none;
 }
