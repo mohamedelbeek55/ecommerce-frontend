@@ -238,7 +238,7 @@
                 </div>
 
                 <!-- Submit -->
-                <button type="submit" [disabled]="loading()"
+                <button type="submit" [disabled]="loading() || googleLoading()"
                     class="w-full rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60">
                     @if (loading()) {
                     Creating account...
@@ -247,6 +247,28 @@
                     }
                 </button>
             </form>
+
+            <!-- Divider -->
+            <div class="my-6 flex items-center gap-3">
+                <div class="h-px flex-1 bg-border"></div>
+
+                <span class="text-xs text-text-muted">
+                    OR
+                </span>
+
+                <div class="h-px flex-1 bg-border"></div>
+            </div>
+
+            <!-- Google Sign Up -->
+            <div class="flex flex-col items-center gap-2">
+                <div #googleButton class="min-h-10"></div>
+
+                @if (googleLoading()) {
+                <p class="text-xs text-text-muted">
+                    Signing up with Google...
+                </p>
+                }
+            </div>
             }
 
             <!-- Footer -->
