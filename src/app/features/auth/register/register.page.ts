@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -33,12 +33,13 @@ function passwordsMatchValidator(
   templateUrl: './register.page.html',
   styleUrl: './register.page.scss',
 })
-export class RegisterPage implements OnInit {
+export class RegisterPage implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
 
   private returnUrl: string | null = null;
+  private countdownTimer: ReturnType<typeof setInterval> | null = null;
 
   readonly form = this.fb.group(
     {
@@ -67,6 +68,11 @@ export class RegisterPage implements OnInit {
   readonly errors = signal<string[]>([]);
   readonly success = signal(false);
 
+  readonly resendLoading = signal(false);
+  readonly resendSuccess = signal(false);
+  readonly resendErrors = signal<string[]>([]);
+  readonly resendCountdown = signal(0);
+
   readonly showPassword = signal(false);
   readonly showConfirmPassword = signal(false);
 
@@ -74,6 +80,10 @@ export class RegisterPage implements OnInit {
     this.returnUrl = sanitizeReturnUrl(
       this.route.snapshot.queryParamMap.get('returnUrl'),
     );
+  }
+
+  ngOnDestroy(): void {
+    this.stopCountdown();
   }
 
   get loginQueryParams(): { returnUrl: string } | null {
@@ -99,12 +109,66 @@ export class RegisterPage implements OnInit {
       next: () => {
         this.loading.set(false);
         this.success.set(true);
+        this.startCountdown();
       },
       error: (err: NormalizedError) => {
         this.loading.set(false);
         this.errors.set(err.messages);
       },
     });
+  }
+
+  resendVerification(): void {
+    if (
+      this.resendCountdown() > 0 ||
+      this.resendLoading() ||
+      !this.emailControl.value
+    ) {
+      return;
+    }
+
+    const email = this.emailControl.value.trim().toLowerCase();
+
+    this.resendLoading.set(true);
+    this.resendSuccess.set(false);
+    this.resendErrors.set([]);
+
+    this.authService.resendVerification(email).subscribe({
+      next: () => {
+        this.resendLoading.set(false);
+        this.resendSuccess.set(true);
+        this.startCountdown();
+      },
+      error: (err: NormalizedError) => {
+        this.resendLoading.set(false);
+        this.resendErrors.set(err.messages);
+      },
+    });
+  }
+
+  private startCountdown(): void {
+    this.stopCountdown();
+
+    this.resendCountdown.set(60);
+
+    this.countdownTimer = setInterval(() => {
+      const remaining = this.resendCountdown();
+
+      if (remaining <= 1) {
+        this.resendCountdown.set(0);
+        this.stopCountdown();
+        return;
+      }
+
+      this.resendCountdown.set(remaining - 1);
+    }, 1000);
+  }
+
+  private stopCountdown(): void {
+    if (this.countdownTimer) {
+      clearInterval(this.countdownTimer);
+      this.countdownTimer = null;
+    }
   }
 
   togglePasswordVisibility(): void {
@@ -137,5 +201,4 @@ export class RegisterPage implements OnInit {
       !!this.confirmPasswordControl.touched
     );
   }
-
 }

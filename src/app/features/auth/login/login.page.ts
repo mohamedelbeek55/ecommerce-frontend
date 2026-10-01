@@ -1,9 +1,57 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  inject,
+  signal,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+
 import { AuthService } from '../../../core/services/auth.service';
 import { sanitizeReturnUrl } from '../../../shared/utils/return-url.util';
 import type { NormalizedError } from '../../../core/interceptors/error.interceptor';
+import { environment } from '../../../../environments/environment';
+
+interface GoogleCredentialResponse {
+  credential: string;
+}
+
+interface GoogleAccountsId {
+  initialize(config: {
+    client_id: string;
+    callback: (response: GoogleCredentialResponse) => void;
+  }): void;
+
+  renderButton(
+    element: HTMLElement,
+    options: {
+      theme?: 'outline' | 'filled_blue' | 'filled_black';
+      size?: 'small' | 'medium' | 'large';
+      text?: 'signin_with' | 'signup_with' | 'continue_with' | 'signin';
+      shape?: 'rectangular' | 'pill' | 'circle' | 'square';
+      width?: number;
+      logo_alignment?: 'left' | 'center';
+    },
+  ): void;
+
+  cancel(): void;
+}
+
+interface GoogleGlobal {
+  accounts: {
+    id: GoogleAccountsId;
+  };
+}
+
+declare global {
+  interface Window {
+    google?: GoogleGlobal;
+  }
+}
 
 @Component({
   selector: 'app-login-page',
@@ -11,25 +59,34 @@ import type { NormalizedError } from '../../../core/interceptors/error.intercept
   templateUrl: './login.page.html',
   styleUrl: './login.page.scss',
 })
-export class LoginPage implements OnInit {
+export class LoginPage implements OnInit, AfterViewInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
+  @ViewChild('googleButton')
+  private readonly googleButton?: ElementRef<HTMLElement>;
+
   readonly showPassword = signal(false);
+
+  readonly loading = signal(false);
+  readonly googleLoading = signal(false);
+
+  readonly errors = signal<string[]>([]);
+  readonly emailNotVerified = signal(false);
+
+  readonly resendLoading = signal(false);
+  readonly resendVerificationMessage = signal<string | null>(null);
+
   private returnUrl: string | null = null;
+
+  private googleReadyTimer: ReturnType<typeof setTimeout> | null = null;
 
   readonly form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(8)]],
   });
-
-  readonly loading = signal(false);
-  readonly errors = signal<string[]>([]);
-  readonly emailNotVerified = signal(false);
-  readonly resendLoading = signal(false);
-  readonly resendVerificationMessage = signal<string | null>(null);
 
   ngOnInit(): void {
     this.returnUrl = sanitizeReturnUrl(
@@ -37,7 +94,18 @@ export class LoginPage implements OnInit {
     );
   }
 
-  /** Query params forwarded to register so returnUrl survives the auth loop. */
+  ngAfterViewInit(): void {
+    this.initializeGoogleSignIn();
+  }
+
+  ngOnDestroy(): void {
+    if (this.googleReadyTimer) {
+      clearTimeout(this.googleReadyTimer);
+    }
+
+    window.google?.accounts.id.cancel();
+  }
+
   get registerQueryParams(): { returnUrl: string } | null {
     return this.returnUrl ? { returnUrl: this.returnUrl } : null;
   }
@@ -53,48 +121,112 @@ export class LoginPage implements OnInit {
     this.emailNotVerified.set(false);
     this.resendVerificationMessage.set(null);
 
-    const { email, password } = this.form.getRawValue();
-    const trimmedEmail = email!.trim().toLowerCase();
+    const email = this.form.controls.email.value ?? '';
+    const password = this.form.controls.password.value ?? '';
 
-    this.authService.login(trimmedEmail!, password!).subscribe({
+    this.authService.login(email, password).subscribe({
       next: () => {
         this.loading.set(false);
-
-        const user = this.authService.currentUser();
-
-
-        if (user?.role === 'ADMIN') {
-          void this.router.navigate(['/admin']);
-          return;
-        }
-
-        if (this.returnUrl) {
-          void this.router.navigateByUrl(this.returnUrl);
-        } else {
-          void this.router.navigate(['/']);
-        }
+        this.navigateAfterLogin();
       },
-      error: (err: NormalizedError) => {
+      error: (error: NormalizedError) => {
         this.loading.set(false);
 
-        if (err.statusCode === 403) {
+        if (error.statusCode === 403) {
           this.emailNotVerified.set(true);
           this.errors.set([
-            'Your email address is not verified yet.',
-            'Please check your inbox for the verification link, then try again.',
+            'Your email address has not been verified yet.',
           ]);
           return;
         }
 
-        this.errors.set(err.messages);
+        this.errors.set(error.messages);
       },
     });
   }
 
+  private initializeGoogleSignIn(): void {
+    if (window.google?.accounts?.id) {
+      this.renderGoogleButton();
+      return;
+    }
+
+    this.googleReadyTimer = setTimeout(() => {
+      this.initializeGoogleSignIn();
+    }, 100);
+  }
+
+  private renderGoogleButton(): void {
+    const element = this.googleButton?.nativeElement;
+
+    if (!element || !window.google?.accounts?.id) {
+      return;
+    }
+
+    window.google.accounts.id.initialize({
+      client_id: environment.googleClientId,
+      callback: (response: GoogleCredentialResponse) => {
+        this.handleGoogleCredential(response);
+      },
+    });
+
+    element.innerHTML = '';
+
+    window.google.accounts.id.renderButton(element, {
+      theme: 'outline',
+      size: 'large',
+      text: 'continue_with',
+      shape: 'rectangular',
+      width: 350,
+      logo_alignment: 'center',
+    });
+  }
+
+  private handleGoogleCredential(
+    response: GoogleCredentialResponse,
+  ): void {
+    if (!response.credential) {
+      this.errors.set(['Google sign-in failed. Please try again.']);
+      return;
+    }
+
+    this.googleLoading.set(true);
+    this.errors.set([]);
+    this.emailNotVerified.set(false);
+    this.resendVerificationMessage.set(null);
+
+    this.authService.googleLogin(response.credential).subscribe({
+      next: () => {
+        this.googleLoading.set(false);
+        this.navigateAfterLogin();
+      },
+      error: (error: NormalizedError) => {
+        this.googleLoading.set(false);
+
+        this.errors.set(
+          error.messages?.length
+            ? error.messages
+            : ['Google sign-in failed. Please try again.'],
+        );
+      },
+    });
+  }
+
+  private navigateAfterLogin(): void {
+    const currentUser = this.authService.currentUser();
+
+    if (currentUser?.role === 'ADMIN') {
+      void this.router.navigate(['/admin']);
+      return;
+    }
+
+    void this.router.navigate([this.returnUrl ?? '/']);
+  }
+
   resendVerificationEmail(): void {
-    const email = this.form.controls.email.value?.trim().toLowerCase();
-    if (!email) {
-      this.form.controls.email.markAsTouched();
+    const email = this.form.controls.email.value?.trim();
+
+    if (!email || this.form.controls.email.invalid) {
       return;
     }
 
@@ -105,20 +237,20 @@ export class LoginPage implements OnInit {
       next: () => {
         this.resendLoading.set(false);
         this.resendVerificationMessage.set(
-          'Verification email sent, please check your inbox.',
+          'If an account exists with this email, a verification email has been sent.',
         );
       },
       error: () => {
         this.resendLoading.set(false);
         this.resendVerificationMessage.set(
-          'Verification email sent, please check your inbox.',
+          'If an account exists with this email, a verification email has been sent.',
         );
       },
     });
   }
 
   togglePasswordVisibility(): void {
-    this.showPassword.update((v) => !v);
+    this.showPassword.update((visible) => !visible);
   }
 
   get emailControl() {
@@ -128,5 +260,4 @@ export class LoginPage implements OnInit {
   get passwordControl() {
     return this.form.controls.password;
   }
-
 }

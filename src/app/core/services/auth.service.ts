@@ -11,7 +11,7 @@ import type { NormalizedError } from '../interceptors/error.interceptor';
 import type { UserProfile } from '../models/user.model';
 
 /**
- * Response shape from POST /auth/register, /auth/login, /auth/refresh.
+ * Response shape from POST /auth/register, /auth/login, /auth/google, /auth/refresh.
  * Backend returns only tokens — no user object.
  */
 export interface AuthTokens {
@@ -67,8 +67,6 @@ export class AuthService {
 
         this.loadCurrentUser().subscribe({
             error: () => {
-                // If the existing session cannot be restored, make sure
-                // the local authentication state does not remain stale.
                 this.tokenStorage.clearTokens();
                 this.currentUserSignal.set(null);
             },
@@ -124,6 +122,30 @@ export class AuthService {
                 ),
             );
         // NOTE: 403 "email not verified" is not swallowed here.
+    }
+
+    /**
+     * Authenticates the user using a Google ID token.
+     *
+     * The Google ID token is verified by the backend before our
+     * application tokens are issued.
+     */
+    googleLogin(idToken: string): Observable<AuthTokens> {
+        return this.http
+            .post<AuthTokens>(`${this.apiUrl}/google`, {
+                idToken,
+            })
+            .pipe(
+                tap((tokens) => {
+                    this.tokenStorage.setTokens(
+                        tokens.accessToken,
+                        tokens.refreshToken,
+                    );
+                }),
+                switchMap((tokens) =>
+                    this.loadCurrentUser().pipe(map(() => tokens)),
+                ),
+            );
     }
 
     logout(): Observable<void> {
