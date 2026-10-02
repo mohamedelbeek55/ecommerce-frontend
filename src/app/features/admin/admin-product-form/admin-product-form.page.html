@@ -1,5 +1,5 @@
 <div class="min-h-screen bg-background">
-  <div class="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
 
     <!-- Back link -->
     <a routerLink="/admin/products"
@@ -7,31 +7,50 @@
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
       </svg>
+
       Back to Products
     </a>
 
-    <h1 class="text-3xl font-bold text-text mb-8">
-      {{ isEditMode() ? 'Edit Product' : 'New Product' }}
-    </h1>
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-text">
+        {{ isEditMode() ? 'Edit Product' : 'New Product' }}
+      </h1>
 
-    <!-- Page-level loading skeleton -->
+      <p class="mt-1 text-sm text-text-muted">
+        {{
+        isEditMode()
+        ? 'Update product information and images.'
+        : 'Add a new product to your store.'
+        }}
+      </p>
+    </div>
+
+    <!-- Page loading skeleton -->
     @if (pageLoading()) {
     <div class="bg-surface border border-border rounded-lg p-8 animate-pulse space-y-5">
-      @for (i of [1,2,3,4,5]; track i) {
+
+      @for (i of [1,2,3,4,5,6]; track i) {
       <div class="space-y-2">
         <div class="h-3 bg-background rounded w-1/4"></div>
         <div class="h-10 bg-background rounded"></div>
       </div>
       }
+
       <div class="h-10 bg-background rounded w-1/3"></div>
     </div>
     }
 
-    <!-- Page-level error (e.g. product not found in edit mode) -->
+    <!-- Page-level error -->
     @if (!pageLoading() && pageError()) {
     <div class="bg-surface border border-border rounded-lg p-12 text-center">
+
       <div class="text-4xl mb-4">⚠️</div>
-      <p class="text-text-muted mb-6">{{ pageError() }}</p>
+
+      <p class="text-text-muted mb-6">
+        {{ pageError() }}
+      </p>
+
       <a routerLink="/admin/products"
         class="bg-primary hover:bg-primary-hover text-white px-6 py-3 rounded-md font-medium transition">
         Back to Products
@@ -41,68 +60,111 @@
 
     <!-- Form -->
     @if (!pageLoading() && !pageError()) {
-    <div class="bg-surface border border-border rounded-lg p-8">
+    <div class="bg-surface border border-border rounded-lg p-6 sm:p-8">
+
       <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="space-y-6">
 
         <!-- Name -->
         <div>
           <label for="name" class="block text-sm font-medium text-text mb-1.5">
-            Name <span class="text-destructive">*</span>
+            Name
+            <span class="text-destructive">*</span>
           </label>
-          <input id="name" type="text" formControlName="name" placeholder="e.g. Linen Sofa — 3 Seater" class="w-full rounded-md border px-3 py-2 text-sm text-text bg-surface placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary transition
-                {{ nameControl.invalid && nameControl.touched ? 'border-destructive' : 'border-border' }}" />
+
+          <input id="name" type="text" formControlName="name" placeholder="e.g. Linen Sofa — 3 Seater"
+            class="w-full rounded-md border px-3 py-2.5 text-sm text-text bg-surface placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary transition"
+            [class.border-destructive]="nameControl.invalid && nameControl.touched"
+            [class.border-border]="!(nameControl.invalid && nameControl.touched)" />
+
           @if (nameControl.touched && nameControl.hasError('required')) {
-          <p class="mt-1 text-xs text-destructive">Name is required.</p>
+          <p class="mt-1 text-xs text-destructive">
+            Name is required.
+          </p>
           } @else if (nameControl.touched && nameControl.hasError('minlength')) {
-          <p class="mt-1 text-xs text-destructive">Name must be at least 2 characters.</p>
+          <p class="mt-1 text-xs text-destructive">
+            Name must be at least 2 characters.
+          </p>
           } @else if (nameControl.touched && nameControl.hasError('maxlength')) {
-          <p class="mt-1 text-xs text-destructive">Name cannot exceed 100 characters.</p>
+          <p class="mt-1 text-xs text-destructive">
+            Name cannot exceed 100 characters.
+          </p>
           }
         </div>
 
         <!-- Description -->
         <div>
           <label for="description" class="block text-sm font-medium text-text mb-1.5">
-            Description <span class="text-destructive">*</span>
+            Description
+            <span class="text-destructive">*</span>
           </label>
+
           <textarea id="description" formControlName="description" rows="4"
             placeholder="Describe the product in at least 10 characters…"
-            class="w-full rounded-md border px-3 py-2 text-sm text-text bg-surface placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary transition resize-y
-                {{ descriptionControl.invalid && descriptionControl.touched ? 'border-destructive' : 'border-border' }}"></textarea>
+            class="w-full rounded-md border px-3 py-2.5 text-sm text-text bg-surface placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary transition resize-y"
+            [class.border-destructive]="descriptionControl.invalid && descriptionControl.touched"
+            [class.border-border]="!(descriptionControl.invalid && descriptionControl.touched)"></textarea>
+
           @if (descriptionControl.touched && descriptionControl.hasError('required')) {
-          <p class="mt-1 text-xs text-destructive">Description is required.</p>
+          <p class="mt-1 text-xs text-destructive">
+            Description is required.
+          </p>
           } @else if (descriptionControl.touched && descriptionControl.hasError('minlength')) {
-          <p class="mt-1 text-xs text-destructive">Description must be at least 10 characters.</p>
+          <p class="mt-1 text-xs text-destructive">
+            Description must be at least 10 characters.
+          </p>
           } @else if (descriptionControl.touched && descriptionControl.hasError('maxlength')) {
-          <p class="mt-1 text-xs text-destructive">Description cannot exceed 1000 characters.</p>
+          <p class="mt-1 text-xs text-destructive">
+            Description cannot exceed 1000 characters.
+          </p>
           }
         </div>
 
-        <!-- Price + Stock (side by side) -->
-        <div class="grid grid-cols-2 gap-4">
+        <!-- Price + Stock -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+          <!-- Price -->
           <div>
             <label for="price" class="block text-sm font-medium text-text mb-1.5">
-              Price ($) <span class="text-destructive">*</span>
+              Price ($)
+              <span class="text-destructive">*</span>
             </label>
-            <input id="price" type="number" formControlName="price" min="0.01" step="0.01" placeholder="0.00" class="w-full rounded-md border px-3 py-2 text-sm text-text bg-surface placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary transition
-                  {{ priceControl.invalid && priceControl.touched ? 'border-destructive' : 'border-border' }}" />
+
+            <input id="price" type="number" formControlName="price" min="0.01" step="0.01" placeholder="0.00"
+              class="w-full rounded-md border px-3 py-2.5 text-sm text-text bg-surface placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary transition"
+              [class.border-destructive]="priceControl.invalid && priceControl.touched"
+              [class.border-border]="!(priceControl.invalid && priceControl.touched)" />
+
             @if (priceControl.touched && priceControl.hasError('required')) {
-            <p class="mt-1 text-xs text-destructive">Price is required.</p>
+            <p class="mt-1 text-xs text-destructive">
+              Price is required.
+            </p>
             } @else if (priceControl.touched && priceControl.hasError('min')) {
-            <p class="mt-1 text-xs text-destructive">Price must be greater than 0.</p>
+            <p class="mt-1 text-xs text-destructive">
+              Price must be greater than 0.
+            </p>
             }
           </div>
 
+          <!-- Stock -->
           <div>
             <label for="stock" class="block text-sm font-medium text-text mb-1.5">
-              Stock <span class="text-destructive">*</span>
+              Stock
+              <span class="text-destructive">*</span>
             </label>
-            <input id="stock" type="number" formControlName="stock" min="0" step="1" placeholder="0" class="w-full rounded-md border px-3 py-2 text-sm text-text bg-surface placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary transition
-                  {{ stockControl.invalid && stockControl.touched ? 'border-destructive' : 'border-border' }}" />
+
+            <input id="stock" type="number" formControlName="stock" min="0" step="1" placeholder="0"
+              class="w-full rounded-md border px-3 py-2.5 text-sm text-text bg-surface placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary transition"
+              [class.border-destructive]="stockControl.invalid && stockControl.touched"
+              [class.border-border]="!(stockControl.invalid && stockControl.touched)" />
+
             @if (stockControl.touched && stockControl.hasError('required')) {
-            <p class="mt-1 text-xs text-destructive">Stock is required.</p>
+            <p class="mt-1 text-xs text-destructive">
+              Stock is required.
+            </p>
             } @else if (stockControl.touched && stockControl.hasError('nonNegativeInteger')) {
-            <p class="mt-1 text-xs text-destructive">Stock must be a non-negative whole number.</p>
+            <p class="mt-1 text-xs text-destructive">
+              Stock must be a non-negative whole number.
+            </p>
             }
           </div>
         </div>
@@ -110,21 +172,146 @@
         <!-- Category -->
         <div>
           <label for="categoryId" class="block text-sm font-medium text-text mb-1.5">
-            Category <span class="text-destructive">*</span>
+            Category
+            <span class="text-destructive">*</span>
           </label>
-          <select id="categoryId" formControlName="categoryId" class="w-full rounded-md border px-3 py-2 text-sm text-text bg-surface focus:outline-none focus:ring-2 focus:ring-primary transition
-                {{ categoryIdControl.invalid && categoryIdControl.touched ? 'border-destructive' : 'border-border' }}">
-            <option value="" disabled>Select a category…</option>
+
+          <select id="categoryId" formControlName="categoryId"
+            class="w-full rounded-md border px-3 py-2.5 text-sm text-text bg-surface focus:outline-none focus:ring-2 focus:ring-primary transition"
+            [class.border-destructive]="categoryIdControl.invalid && categoryIdControl.touched"
+            [class.border-border]="!(categoryIdControl.invalid && categoryIdControl.touched)">
+            <option value="" disabled>
+              Select a category…
+            </option>
+
             @for (cat of categories(); track cat.id) {
-            <option [value]="cat.id">{{ cat.name }}</option>
+            <option [value]="cat.id">
+              {{ cat.name }}
+            </option>
             }
           </select>
+
           @if (categoryIdControl.touched && categoryIdControl.hasError('required')) {
-          <p class="mt-1 text-xs text-destructive">Category is required.</p>
+          <p class="mt-1 text-xs text-destructive">
+            Category is required.
+          </p>
           }
         </div>
 
-        <!-- Backend error banners -->
+        <!-- Images -->
+        <div class="border-t border-border pt-6">
+
+          <div class="mb-3">
+            <label for="images" class="block text-sm font-medium text-text">
+              Product Images
+              <span class="text-destructive">*</span>
+            </label>
+
+            <p class="mt-1 text-xs text-text-muted">
+              Upload up to 5 images. Each image must be 5MB or smaller.
+            </p>
+
+            @if (isEditMode()) {
+            <p class="mt-1 text-xs text-text-muted">
+              Leave this empty to keep the current images. Selecting new images
+              will replace all existing images.
+            </p>
+            }
+          </div>
+
+          <!-- Existing images -->
+          @if (isEditMode() && existingImages().length > 0) {
+          <div class="mb-4">
+
+            <p class="text-xs font-medium text-text-muted mb-2">
+              Current images
+            </p>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+              @for (image of existingImages(); track image.id) {
+              <div class="aspect-square rounded-md overflow-hidden border border-border bg-background">
+                <img [src]="image.url" alt="Current product image" class="w-full h-full object-cover" />
+              </div>
+              }
+            </div>
+
+          </div>
+          }
+
+          <!-- Upload area -->
+          @if (selectedImages().length < 5) { <label for="images"
+            class="flex flex-col items-center justify-center gap-2 min-h-32 rounded-lg border-2 border-dashed border-border bg-background px-4 py-6 text-center cursor-pointer hover:border-primary hover:bg-surface transition">
+            <svg class="w-8 h-8 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M3 16.5V19a2 2 0 002 2h14a2 2 0 002-2v-2.5M7 10l5-5m0 0l5 5m-5-5v12" />
+            </svg>
+
+            <span class="text-sm font-medium text-text">
+              Choose product images
+            </span>
+
+            <span class="text-xs text-text-muted">
+              PNG, JPG, WEBP up to 5MB each
+            </span>
+
+            <input id="images" type="file" accept="image/*" multiple class="sr-only"
+              (change)="onImagesSelected($event)" />
+            </label>
+            }
+
+            <!-- Selected image previews -->
+            @if (selectedImages().length > 0) {
+            <div class="mt-4">
+
+              <div class="flex items-center justify-between mb-2">
+                <p class="text-xs font-medium text-text-muted">
+                  New images
+                </p>
+
+                <p class="text-xs text-text-muted">
+                  {{ selectedImages().length }} / 5
+                </p>
+              </div>
+
+              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                @for (preview of imagePreviews(); track preview; let i = $index) {
+                <div class="relative aspect-square rounded-md overflow-hidden border border-border bg-background group">
+                  <img [src]="preview" alt="Selected product image" class="w-full h-full object-cover" />
+
+                  <button type="button" (click)="removeSelectedImage(i)"
+                    class="absolute top-2 right-2 w-7 h-7 rounded-full bg-text text-white text-sm flex items-center justify-center opacity-90 hover:opacity-100 transition"
+                    [attr.aria-label]="'Remove image ' + (i + 1)">
+                    ×
+                  </button>
+                </div>
+                }
+              </div>
+
+              @if (isEditMode()) {
+              <p class="mt-3 text-xs text-text-muted">
+                These images will replace the current product images when you save.
+              </p>
+              }
+            </div>
+            }
+
+            <!-- Image error -->
+            @if (imageError()) {
+            <div role="alert"
+              class="mt-3 flex items-center gap-2 text-sm font-medium text-destructive border border-destructive bg-surface rounded-md px-4 py-3">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 9v2m0 4h.01M12 3a9 9 0 100 18A9 9 0 0012 3z" />
+              </svg>
+
+              {{ imageError() }}
+            </div>
+            }
+
+        </div>
+
+        <!-- Backend errors -->
         @if (errors().length > 0) {
         <div role="alert" class="space-y-1">
           @for (msg of errors(); track msg) {
@@ -134,6 +321,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M12 9v2m0 4h.01M12 3a9 9 0 100 18A9 9 0 0012 3z" />
             </svg>
+
             {{ msg }}
           </div>
           }
@@ -141,23 +329,28 @@
         }
 
         <!-- Actions -->
-        <div class="flex items-center gap-3 pt-2">
+        <div class="flex flex-col-reverse sm:flex-row sm:items-center gap-3 pt-2">
+
+          <a routerLink="/admin/products"
+            class="text-center text-sm font-medium border border-border text-text-muted hover:border-primary hover:text-primary px-5 py-2.5 rounded-md transition">
+            Cancel
+          </a>
+
           <button type="submit" [disabled]="submitting()"
-            class="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-6 py-2 rounded-md font-medium transition disabled:opacity-60 disabled:cursor-not-allowed">
+            class="flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded-md font-medium transition disabled:opacity-60 disabled:cursor-not-allowed">
             @if (submitting()) {
             <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
             </svg>
+
             Saving…
             } @else {
             {{ isEditMode() ? 'Save Changes' : 'Create Product' }}
             }
           </button>
-          <a routerLink="/admin/products"
-            class="text-sm font-medium border border-border text-text-muted hover:border-primary hover:text-primary px-5 py-2 rounded-md transition">
-            Cancel
-          </a>
+
         </div>
 
       </form>

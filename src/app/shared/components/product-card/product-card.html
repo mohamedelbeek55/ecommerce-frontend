@@ -1,14 +1,21 @@
 <a [routerLink]="['/products', product().id]"
   class="group bg-surface border border-border rounded-lg overflow-hidden hover:border-primary transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary block h-full">
-
-  <!-- Image / avatar area -->
-  <div class="bg-background h-52 w-full flex items-center justify-center overflow-hidden relative">
-    <div
-      class="w-24 h-24 rounded-full bg-hero flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
-      <span class="text-4xl font-bold text-primary select-none">
-        {{ getInitials(product().name) }}
-      </span>
+  <!-- Product image -->
+  <div class="bg-background h-52 w-full overflow-hidden relative">
+    @if (product().images.length > 0) {
+    <img [src]="product().images[0].url" [alt]="product().name"
+      class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
+    } @else {
+    <!-- Fallback when product has no image -->
+    <div class="w-full h-full flex items-center justify-center">
+      <div
+        class="w-24 h-24 rounded-full bg-hero flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
+        <span class="text-4xl font-bold text-primary select-none">
+          {{ getInitials(product().name) }}
+        </span>
+      </div>
     </div>
+    }
   </div>
 
   <!-- Info -->
