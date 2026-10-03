@@ -1,44 +1,37 @@
-<section class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+
     <!-- Header -->
     <div class="mb-8">
-        <h1 class="text-2xl font-semibold text-text sm:text-3xl">
-            Admin Dashboard
-        </h1>
-
-        <p class="mt-2 text-sm text-text-muted">
-            Overview of your store and inventory.
-        </p>
+        <h1 class="text-2xl sm:text-3xl font-bold text-text">Admin Dashboard</h1>
+        <p class="mt-1 text-sm text-text-muted">Overview of your store and inventory.</p>
     </div>
 
     <!-- Error -->
     @if (error(); as errorMessage) {
-    <div class="mb-6 rounded-lg border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive"
-        role="alert">
+    <div class="mb-6 rounded-lg border border-destructive bg-surface px-4 py-3 text-sm text-destructive" role="alert">
         {{ errorMessage }}
     </div>
     }
 
     <!-- Summary Cards -->
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-8">
+
         <!-- Total Products -->
         <div class="rounded-lg border border-border bg-surface p-5">
             <div class="flex items-start justify-between">
                 <div>
-                    <p class="text-sm font-medium text-text-muted">
-                        Total Products
-                    </p>
-
+                    <p class="text-xs font-semibold text-text-muted uppercase tracking-wider">Total Products</p>
                     @if (loading()) {
-                    <div class="mt-3 h-9 w-20 animate-pulse rounded-md bg-background"></div>
+                    <div class="mt-3 h-9 w-16 animate-pulse rounded-md bg-background"></div>
                     } @else {
-                    <p class="mt-2 text-3xl font-semibold text-text">
-                        {{ totalProducts() }}
-                    </p>
+                    <p class="mt-2 text-3xl font-bold text-text">{{ totalProducts() }}</p>
                     }
                 </div>
-
-                <div class="rounded-md bg-hero px-3 py-2 text-sm font-medium text-primary" aria-hidden="true">
-                    Products
+                <div class="w-9 h-9 rounded-md bg-hero flex items-center justify-center shrink-0" aria-hidden="true">
+                    <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
                 </div>
             </div>
         </div>
@@ -47,21 +40,18 @@
         <div class="rounded-lg border border-border bg-surface p-5">
             <div class="flex items-start justify-between">
                 <div>
-                    <p class="text-sm font-medium text-text-muted">
-                        Total Categories
-                    </p>
-
+                    <p class="text-xs font-semibold text-text-muted uppercase tracking-wider">Total Categories</p>
                     @if (loading()) {
-                    <div class="mt-3 h-9 w-20 animate-pulse rounded-md bg-background"></div>
+                    <div class="mt-3 h-9 w-16 animate-pulse rounded-md bg-background"></div>
                     } @else {
-                    <p class="mt-2 text-3xl font-semibold text-text">
-                        {{ totalCategories() }}
-                    </p>
+                    <p class="mt-2 text-3xl font-bold text-text">{{ totalCategories() }}</p>
                     }
                 </div>
-
-                <div class="rounded-md bg-hero px-3 py-2 text-sm font-medium text-primary" aria-hidden="true">
-                    Categories
+                <div class="w-9 h-9 rounded-md bg-hero flex items-center justify-center shrink-0" aria-hidden="true">
+                    <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                    </svg>
                 </div>
             </div>
         </div>
@@ -70,73 +60,70 @@
         <div class="rounded-lg border border-border bg-surface p-5">
             <div class="flex items-start justify-between">
                 <div>
-                    <p class="text-sm font-medium text-text-muted">
-                        Low Stock
-                    </p>
-
+                    <p class="text-xs font-semibold text-text-muted uppercase tracking-wider">Low Stock</p>
                     @if (loading()) {
-                    <div class="mt-3 h-9 w-20 animate-pulse rounded-md bg-background"></div>
+                    <div class="mt-3 h-9 w-16 animate-pulse rounded-md bg-background"></div>
                     } @else {
-                    <p class="mt-2 text-3xl font-semibold text-text">
+                    <p class="mt-2 text-3xl font-bold text-text" [class.text-rating]="lowStockProducts() > 0">
                         {{ lowStockProducts() }}
                     </p>
                     }
                 </div>
-
-                <div class="rounded-md bg-background px-3 py-2 text-sm font-medium text-text-muted" aria-hidden="true">
-                    Stock
+                <div class="w-9 h-9 rounded-md bg-background flex items-center justify-center shrink-0"
+                    aria-hidden="true">
+                    <svg class="w-4 h-4 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Quick Actions -->
-    <div class="mt-8">
-        <div class="mb-4">
-            <h2 class="text-lg font-semibold text-text">
-                Quick Actions
-            </h2>
-
-            <p class="mt-1 text-sm text-text-muted">
-                Manage your store quickly from here.
-            </p>
-        </div>
-
+    <div class="mb-8">
+        <h2 class="text-base font-semibold text-text mb-4">Quick Actions</h2>
         <div class="grid gap-4 sm:grid-cols-2">
             <a routerLink="/admin/products/new"
-                class="rounded-lg border border-border bg-surface p-5 transition-colors hover:border-primary hover:bg-background">
-                <p class="font-semibold text-text">
-                    Add Product
-                </p>
-
-                <p class="mt-1 text-sm text-text-muted">
-                    Create a new product for your store.
-                </p>
+                class="group rounded-lg border border-border bg-surface p-5 transition-colors hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-8 h-8 rounded-md bg-hero flex items-center justify-center shrink-0">
+                        <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                    </div>
+                    <p class="font-semibold text-text group-hover:text-primary transition-colors text-sm">Add Product
+                    </p>
+                </div>
+                <p class="text-xs text-text-muted">Create a new product for your store.</p>
             </a>
 
             <a routerLink="/admin/categories/new"
-                class="rounded-lg border border-border bg-surface p-5 transition-colors hover:border-primary hover:bg-background">
-                <p class="font-semibold text-text">
-                    Add Category
-                </p>
-
-                <p class="mt-1 text-sm text-text-muted">
-                    Create a new product category.
-                </p>
+                class="group rounded-lg border border-border bg-surface p-5 transition-colors hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-8 h-8 rounded-md bg-hero flex items-center justify-center shrink-0">
+                        <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                    </div>
+                    <p class="font-semibold text-text group-hover:text-primary transition-colors text-sm">Add Category
+                    </p>
+                </div>
+                <p class="text-xs text-text-muted">Create a new product category.</p>
             </a>
         </div>
     </div>
 
-    <!-- Current Scope -->
-    <div class="mt-8 rounded-lg border border-border bg-surface p-5">
-        <h2 class="font-semibold text-text">
-            Dashboard scope
-        </h2>
-
-        <p class="mt-2 text-sm leading-6 text-text-muted">
+    <!-- Dashboard scope note -->
+    <div class="rounded-lg border border-border bg-surface p-5">
+        <h2 class="text-sm font-semibold text-text mb-2">Dashboard scope</h2>
+        <p class="text-sm leading-relaxed text-text-muted">
             This dashboard currently covers product and category inventory.
             Orders and revenue are not included because the current backend
             does not provide the required admin endpoints.
         </p>
     </div>
+
 </section>

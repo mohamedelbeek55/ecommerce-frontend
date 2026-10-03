@@ -2,35 +2,34 @@
     <div class="w-full max-w-md">
         <div class="bg-surface border border-border rounded-lg p-8 shadow-sm">
 
+            <!-- Header -->
             <div class="mb-6">
-                <h1 class="text-2xl font-bold text-text mb-2">
-                    Welcome back
-                </h1>
-
-                <p class="text-text-muted text-sm">
-                    Sign in to your account to continue.
-                </p>
+                <h1 class="text-2xl font-bold text-text mb-1">Welcome back</h1>
+                <p class="text-sm text-text-muted">Sign in to your account to continue.</p>
             </div>
 
+            <!-- Resend verification info banner -->
             @if (resendVerificationMessage()) {
             <div class="mb-4 rounded-md border border-border bg-background px-4 py-3 text-sm text-text">
                 {{ resendVerificationMessage() }}
             </div>
             }
 
+            <!-- Error banner -->
             @if (errors().length > 0) {
-            <div class="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                <ul class="space-y-1">
+            <div role="alert" class="mb-4 rounded-md border border-destructive bg-surface px-4 py-3 text-sm">
+                <ul class="space-y-1 text-destructive">
                     @for (error of errors(); track error) {
                     <li>{{ error }}</li>
                     }
                 </ul>
 
                 @if (emailNotVerified()) {
-                <button type="button" class="mt-3 text-sm font-medium underline disabled:opacity-50"
+                <button type="button"
+                    class="mt-3 text-sm font-medium text-primary hover:text-primary-hover underline underline-offset-2 disabled:opacity-50 transition-colors"
                     [disabled]="resendLoading()" (click)="resendVerificationEmail()">
                     @if (resendLoading()) {
-                    Sending...
+                    Sending…
                     } @else {
                     Resend verification email
                     }
@@ -39,22 +38,20 @@
             </div>
             }
 
-            <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
+            <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4" novalidate>
+
                 <!-- Email -->
                 <div>
-                    <label for="email" class="mb-1.5 block text-sm font-medium text-text">
+                    <label for="email" class="block text-sm font-medium text-text mb-1.5">
                         Email
                     </label>
-
                     <input id="email" type="email" formControlName="email" autocomplete="email"
                         placeholder="you@example.com"
-                        class="w-full rounded-md border border-border bg-surface px-3 py-2.5 text-sm text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-                        [class.border-red-400]="
-              emailControl.invalid && emailControl.touched
-            " />
-
+                        class="w-full rounded-md border bg-surface px-3 py-2.5 text-sm text-text placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                        [class.border-destructive]="emailControl.invalid && emailControl.touched"
+                        [class.border-border]="!(emailControl.invalid && emailControl.touched)" />
                     @if (emailControl.invalid && emailControl.touched) {
-                    <p class="mt-1 text-xs text-red-600">
+                    <p class="mt-1.5 text-xs text-destructive">
                         @if (emailControl.hasError('required')) {
                         Email is required.
                         } @else if (emailControl.hasError('email')) {
@@ -66,34 +63,27 @@
 
                 <!-- Password -->
                 <div>
-                    <div class="mb-1.5 flex items-center justify-between">
-                        <label for="password" class="block text-sm font-medium text-text">
-                            Password
-                        </label>
-
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label for="password" class="block text-sm font-medium text-text">Password</label>
                         <a routerLink="/forgot-password"
-                            class="text-xs font-medium text-primary hover:text-primary-hover">
+                            class="text-xs font-medium text-primary hover:text-primary-hover transition-colors focus:outline-none focus:ring-2 focus:ring-primary rounded-sm">
                             Forgot password?
                         </a>
                     </div>
-
                     <div class="relative">
                         <input id="password" [type]="showPassword() ? 'text' : 'password'" formControlName="password"
                             autocomplete="current-password" placeholder="Enter your password"
-                            class="w-full rounded-md border border-border bg-surface px-3 py-2.5 pr-20 text-sm text-text outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-                            [class.border-red-400]="
-                passwordControl.invalid && passwordControl.touched
-              " />
-
-                        <button type="button"
-                            class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-text-muted hover:text-text"
-                            (click)="togglePasswordVisibility()">
+                            class="w-full rounded-md border bg-surface px-3 py-2.5 pr-16 text-sm text-text placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+                            [class.border-destructive]="passwordControl.invalid && passwordControl.touched"
+                            [class.border-border]="!(passwordControl.invalid && passwordControl.touched)" />
+                        <button type="button" (click)="togglePasswordVisibility()"
+                            [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-text-muted hover:text-text transition-colors focus:outline-none focus:ring-2 focus:ring-primary rounded-sm">
                             {{ showPassword() ? 'Hide' : 'Show' }}
                         </button>
                     </div>
-
                     @if (passwordControl.invalid && passwordControl.touched) {
-                    <p class="mt-1 text-xs text-red-600">
+                    <p class="mt-1.5 text-xs text-destructive">
                         @if (passwordControl.hasError('required')) {
                         Password is required.
                         } @else if (passwordControl.hasError('minlength')) {
@@ -103,11 +93,11 @@
                     }
                 </div>
 
-                <!-- Email Login -->
+                <!-- Submit -->
                 <button type="submit" [disabled]="loading() || googleLoading()"
-                    class="w-full rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60">
+                    class="w-full rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1">
                     @if (loading()) {
-                    Signing in...
+                    Signing in…
                     } @else {
                     Sign in
                     }
@@ -117,34 +107,27 @@
             <!-- Divider -->
             <div class="my-6 flex items-center gap-3">
                 <div class="h-px flex-1 bg-border"></div>
-
-                <span class="text-xs text-text-muted">
-                    OR
-                </span>
-
+                <span class="text-xs text-text-muted">OR</span>
                 <div class="h-px flex-1 bg-border"></div>
             </div>
 
             <!-- Google Sign In -->
             <div class="flex flex-col items-center gap-2">
                 <div #googleButton class="min-h-10"></div>
-
                 @if (googleLoading()) {
-                <p class="text-xs text-text-muted">
-                    Signing in with Google...
-                </p>
+                <p class="text-xs text-text-muted">Signing in with Google…</p>
                 }
             </div>
 
-            <!-- Register -->
+            <!-- Register link -->
             <div class="mt-6 text-center text-sm text-text-muted">
                 Don't have an account?
-
                 <a routerLink="/register" [queryParams]="registerQueryParams"
-                    class="font-medium text-primary hover:text-primary-hover">
+                    class="font-medium text-primary hover:text-primary-hover transition-colors focus:outline-none focus:ring-2 focus:ring-primary rounded-sm">
                     Create one
                 </a>
             </div>
+
         </div>
     </div>
 </div>
