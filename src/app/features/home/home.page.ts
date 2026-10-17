@@ -25,7 +25,7 @@ export class HomePage implements OnInit {
 
     ngOnInit(): void {
         this.productsService
-            .getProducts({ limit: 4, sortBy: 'createdAt', sortOrder: 'desc' })
+            .getProducts({ limit: 4, sortBy: 'createdAt', sortOrder: 'asc' })
             .subscribe({
                 next: (res) => {
                     this.featuredProducts.set(res.data);
