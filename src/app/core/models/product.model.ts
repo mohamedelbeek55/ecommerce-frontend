@@ -1,6 +1,12 @@
+export interface ProductImage {
+    id: string;
+    url: string;
+    publicId: string;
+    createdAt: string;
+}
+
 /**
  * Product shape — matches ProductResponseDto on the backend.
- * NOTE: The backend has NO imageUrl field; the UI uses a placeholder image.
  * Prices are serialized as strings (Prisma Decimal → JSON).
  */
 export interface Product {
@@ -10,15 +16,16 @@ export interface Product {
     price: string;
     stock: number;
     categoryId: string;
+    images: ProductImage[];
     createdAt: string;
     updatedAt: string;
 }
 
 /**
  * Payload for POST /products and PATCH /products/:id.
- * Mirrors CreateProductDto / UpdateProductDto on the backend.
- * price is sent as a NUMBER on write (backend @IsNumber) even though it
- * comes back as a string on read (Prisma Decimal → JSON serialization).
+ *
+ * Product images are uploaded separately as multipart/form-data
+ * by the admin product form.
  */
 export interface CreateProductPayload {
     name: string;
@@ -30,7 +37,6 @@ export interface CreateProductPayload {
 
 /**
  * Query parameters for GET /products.
- * All optional — the backend omits filters when not provided.
  */
 export interface ProductQuery {
     page?: number;

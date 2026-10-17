@@ -27,12 +27,16 @@ export class ProductDetailPage implements OnInit {
     readonly notFound = signal(false);
     readonly error = signal<string | null>(null);
 
-    /** Quantity the user wants to add to cart (1–stock, clamped in the template). */
+    // ---------- Product gallery ----------
+    /** Index of the currently displayed product image. */
+    readonly activeImageIndex = signal(0);
+
+    // ---------- Cart state ----------
+    /** Quantity the user wants to add to cart (1–stock). */
     readonly quantity = signal(1);
 
-    // ---------- Cart interaction state ----------
     readonly cartLoading = signal(false);
-    /** Shown briefly after a successful add-to-cart, auto-cleared after 3 s. */
+    /** Shown briefly after a successful add-to-cart. */
     readonly cartSuccess = signal(false);
     readonly cartError = signal<string | null>(null);
 
@@ -40,6 +44,7 @@ export class ProductDetailPage implements OnInit {
 
     ngOnInit(): void {
         const id = this.route.snapshot.paramMap.get('id');
+
         if (!id) {
             this.notFound.set(true);
             this.loading.set(false);
@@ -49,22 +54,60 @@ export class ProductDetailPage implements OnInit {
         this.productsService.getProduct(id).subscribe({
             next: (p) => {
                 this.product.set(p);
+                this.activeImageIndex.set(0);
                 this.loading.set(false);
             },
             error: (err: NormalizedError) => {
                 if (err.statusCode === 404) {
                     this.notFound.set(true);
                 } else {
-                    this.error.set(err.messages[0] ?? 'Failed to load product.');
+                    this.error.set(
+                        err.messages[0] ?? 'Failed to load product.',
+                    );
                 }
+
                 this.loading.set(false);
             },
         });
     }
 
+    // ---------- Product gallery ----------
+
+    previousImage(): void {
+        const images = this.product()?.images ?? [];
+
+        if (images.length <= 1) return;
+
+        this.activeImageIndex.update((index) =>
+            index === 0 ? images.length - 1 : index - 1,
+        );
+    }
+
+    nextImage(): void {
+        const images = this.product()?.images ?? [];
+
+        if (images.length <= 1) return;
+
+        this.activeImageIndex.update((index) =>
+            index === images.length - 1 ? 0 : index + 1,
+        );
+    }
+
+    selectImage(index: number): void {
+        const images = this.product()?.images ?? [];
+
+        if (index < 0 || index >= images.length) return;
+
+        this.activeImageIndex.set(index);
+    }
+
+    // ---------- Cart ----------
+
     increaseQty(): void {
         const p = this.product();
+
         if (!p) return;
+
         this.quantity.update((q) => Math.min(q + 1, p.stock));
     }
 
@@ -74,12 +117,15 @@ export class ProductDetailPage implements OnInit {
 
     onAddToCart(): void {
         const p = this.product();
+
         if (!p) return;
 
         // Cart requires authentication — redirect to login if not signed in.
         if (!this.authService.isAuthenticated()) {
             void this.router.navigate(['/login'], {
-                queryParams: loginQueryParamsWithReturnUrl(this.router.url),
+                queryParams: loginQueryParamsWithReturnUrl(
+                    this.router.url,
+                ),
             });
             return;
         }
@@ -94,12 +140,20 @@ export class ProductDetailPage implements OnInit {
                 this.cartSuccess.set(true);
 
                 // Auto-dismiss the success banner after 3 s.
-                if (this.successTimer) clearTimeout(this.successTimer);
-                this.successTimer = setTimeout(() => this.cartSuccess.set(false), 3000);
+                if (this.successTimer) {
+                    clearTimeout(this.successTimer);
+                }
+
+                this.successTimer = setTimeout(
+                    () => this.cartSuccess.set(false),
+                    3000,
+                );
             },
             error: (err: NormalizedError) => {
                 this.cartLoading.set(false);
-                this.cartError.set(err.messages[0] ?? 'Could not add item to cart.');
+                this.cartError.set(
+                    err.messages[0] ?? 'Could not add item to cart.',
+                );
             },
         });
     }

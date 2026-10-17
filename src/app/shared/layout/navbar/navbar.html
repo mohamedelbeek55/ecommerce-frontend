@@ -1,34 +1,36 @@
 <nav class="sticky top-0 z-40 bg-surface border-b border-border">
-    <div class="max-w-7xl mx-auto px-4">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16 gap-4">
+
             <!-- Brand -->
             <a routerLink="/" (click)="closeAllMenus()"
-                class="shrink-0 text-xl font-bold text-primary hover:text-primary-hover transition">
-                Shop<span class="text-text">Ease</span>
+                class="shrink-0 text-lg font-bold text-text hover:text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary rounded-sm">
+                Shop<span class="text-primary">Ease</span>
             </a>
 
             <!-- Desktop nav + search -->
             <div class="hidden md:flex items-center gap-6 flex-1 min-w-0">
-                <a routerLink="/" routerLinkActive="text-primary font-medium"
-                    [routerLinkActiveOptions]="{ exact: true }" class="text-text-muted hover:text-text transition shrink-0">
+                <a routerLink="/" routerLinkActive="text-primary font-semibold"
+                    [routerLinkActiveOptions]="{ exact: true }"
+                    class="text-sm text-text-muted hover:text-text transition-colors shrink-0 focus:outline-none focus:ring-2 focus:ring-primary rounded-sm">
                     Home
                 </a>
-                <a routerLink="/products" routerLinkActive="text-primary font-medium"
-                    class="text-text-muted hover:text-text transition shrink-0">
+                <a routerLink="/products" routerLinkActive="text-primary font-semibold"
+                    class="text-sm text-text-muted hover:text-text transition-colors shrink-0 focus:outline-none focus:ring-2 focus:ring-primary rounded-sm">
                     Products
                 </a>
 
-                <form class="flex-1 max-w-md ml-auto" (submit)="onSearchSubmit($event)" role="search">
+                <form class="flex-1 max-w-sm ml-auto" (submit)="onSearchSubmit($event)" role="search">
                     <div class="relative">
                         <label for="navbar-search" class="sr-only">Search products</label>
-                        <input id="navbar-search" type="search" placeholder="Search products…"
-                            [value]="searchQuery()"
+                        <input id="navbar-search" type="search" placeholder="Search products…" [value]="searchQuery()"
                             (input)="searchQuery.set($any($event.target).value)"
-                            class="w-full rounded-md border border-border bg-surface pl-3 pr-10 py-2 text-sm text-text placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary transition" />
+                            class="w-full rounded-md border border-border bg-background pl-3 pr-10 py-2 text-sm text-text placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors" />
                         <button type="submit"
-                            class="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted hover:text-primary transition p-1"
-                            aria-label="Search">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            class="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted hover:text-primary transition-colors p-1 focus:outline-none focus:ring-2 focus:ring-primary rounded"
+                            aria-label="Submit search">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
@@ -38,16 +40,18 @@
             </div>
 
             <!-- Desktop right side -->
-            <div class="hidden md:flex items-center gap-4 shrink-0">
-                <a routerLink="/cart" aria-label="Cart"
-                    class="relative text-text-muted hover:text-primary transition p-2">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="hidden md:flex items-center gap-3 shrink-0">
+
+                <!-- Cart -->
+                <a routerLink="/cart" aria-label="View cart"
+                    class="relative text-text-muted hover:text-primary transition-colors p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
                     @if (cartService.itemCount() > 0) {
-                    <span
-                        class="absolute -top-0.5 -right-0.5 min-w-[1.125rem] h-[1.125rem] flex items-center justify-center rounded-full bg-primary text-white text-[0.625rem] font-bold leading-none px-1">
+                    <span aria-label="{{ cartService.itemCount() }} items in cart"
+                        class="absolute -top-0.5 -right-0.5 min-w-[1.1rem] h-[1.1rem] flex items-center justify-center rounded-full bg-primary text-white text-[0.6rem] font-bold leading-none px-1">
                         {{ cartService.itemCount() > 99 ? '99+' : cartService.itemCount() }}
                     </span>
                     }
@@ -55,79 +59,107 @@
 
                 @if (isAuthenticated()) {
                 <div class="relative">
-                    <button type="button" (click)="toggleUserMenu()"
-                        class="flex items-center gap-2 text-text hover:text-primary transition">
-                        <span class="text-sm font-medium">{{ getUserDisplayName() }}</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button type="button" (click)="toggleUserMenu()" [attr.aria-expanded]="userMenuOpen()"
+                        aria-haspopup="true"
+                        class="flex items-center gap-2 text-sm text-text hover:text-primary transition-colors px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                        <span class="font-medium max-w-[120px] truncate">{{ getUserDisplayName() }}</span>
+                        <svg class="w-3.5 h-3.5 text-text-muted shrink-0 transition-transform duration-200"
+                            [class.rotate-180]="userMenuOpen()" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
                     </button>
 
                     @if (userMenuOpen()) {
-                    <div class="absolute right-0 mt-2 w-44 bg-surface border border-border rounded-md shadow-sm py-1">
-                        <a routerLink="/account" (click)="closeAllMenus()"
-                            class="block px-4 py-2 text-sm text-text-muted hover:text-text hover:bg-background transition">
+                    <div role="menu"
+                        class="absolute right-0 mt-1.5 w-44 bg-surface border border-border rounded-lg shadow-sm py-1 z-50">
+                        <a routerLink="/account" (click)="closeAllMenus()" role="menuitem"
+                            class="block px-4 py-2.5 text-sm text-text-muted hover:text-text hover:bg-background transition-colors focus:outline-none focus:bg-background">
                             My Account
                         </a>
-                        <a routerLink="/orders" (click)="closeAllMenus()"
-                            class="block px-4 py-2 text-sm text-text-muted hover:text-text hover:bg-background transition">
+                        <a routerLink="/orders" (click)="closeAllMenus()" role="menuitem"
+                            class="block px-4 py-2.5 text-sm text-text-muted hover:text-text hover:bg-background transition-colors focus:outline-none focus:bg-background">
                             My Orders
                         </a>
                         @if (currentUser()?.role === 'ADMIN') {
-                        <a routerLink="/admin/products" (click)="closeAllMenus()"
-                            class="block px-4 py-2 text-sm text-primary font-medium hover:bg-background transition">
-                            Admin
+                        <div class="border-t border-border my-1"></div>
+                        <a routerLink="/admin" (click)="closeAllMenus()" role="menuitem"
+                            class="block px-4 py-2.5 text-sm text-primary font-medium hover:bg-background transition-colors focus:outline-none focus:bg-background">
+                            Admin Panel
                         </a>
                         }
-                        <button type="button" (click)="logout()"
-                            class="block w-full text-left px-4 py-2 text-sm text-destructive hover:bg-background transition">
+                        <div class="border-t border-border my-1"></div>
+                        <button type="button" (click)="logout()" role="menuitem"
+                            class="block w-full text-left px-4 py-2.5 text-sm text-destructive hover:bg-background transition-colors focus:outline-none focus:bg-background">
                             Log out
                         </button>
                     </div>
                     }
                 </div>
                 } @else {
-                <a routerLink="/login" class="text-sm text-text-muted hover:text-text transition">
+                <a routerLink="/login"
+                    class="text-sm text-text-muted hover:text-text transition-colors px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary rounded-md">
                     Log in
                 </a>
                 <a routerLink="/register"
-                    class="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-md text-sm font-medium transition">
+                    class="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1">
                     Sign up
                 </a>
                 }
             </div>
 
-            <!-- Mobile hamburger -->
-            <button type="button" (click)="toggleMobileMenu()" class="md:hidden text-text p-2.5 -mr-2 shrink-0"
-                aria-label="Toggle menu">
-                @if (mobileMenuOpen()) {
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-                } @else {
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-                }
-            </button>
+            <!-- Mobile: cart + hamburger -->
+            <div class="flex items-center gap-1 md:hidden">
+                <a routerLink="/cart" aria-label="View cart"
+                    class="relative text-text-muted hover:text-primary transition-colors p-2 focus:outline-none focus:ring-2 focus:ring-primary rounded-md">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    @if (cartService.itemCount() > 0) {
+                    <span aria-label="{{ cartService.itemCount() }} items in cart"
+                        class="absolute -top-0.5 -right-0.5 min-w-[1.1rem] h-[1.1rem] flex items-center justify-center rounded-full bg-primary text-white text-[0.6rem] font-bold leading-none px-1">
+                        {{ cartService.itemCount() > 99 ? '99+' : cartService.itemCount() }}
+                    </span>
+                    }
+                </a>
+
+                <button type="button" (click)="toggleMobileMenu()" [attr.aria-expanded]="mobileMenuOpen()"
+                    aria-label="Toggle navigation menu"
+                    class="text-text p-2 -mr-1 focus:outline-none focus:ring-2 focus:ring-primary rounded-md">
+                    @if (mobileMenuOpen()) {
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    } @else {
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    }
+                </button>
+            </div>
+
         </div>
     </div>
 
     <!-- Mobile menu panel -->
     @if (mobileMenuOpen()) {
     <div class="md:hidden border-t border-border bg-surface">
-        <div class="px-4 py-4 space-y-3">
-            <form (submit)="onSearchSubmit($event)" role="search">
+        <div class="px-4 py-4 space-y-1">
+
+            <!-- Search -->
+            <form (submit)="onSearchSubmit($event)" role="search" class="mb-3">
                 <label for="navbar-search-mobile" class="sr-only">Search products</label>
                 <div class="relative">
                     <input id="navbar-search-mobile" type="search" placeholder="Search products…"
-                        [value]="searchQuery()"
-                        (input)="searchQuery.set($any($event.target).value)"
-                        class="w-full rounded-md border border-border bg-surface pl-3 pr-10 py-2 text-sm text-text placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary transition" />
+                        [value]="searchQuery()" (input)="searchQuery.set($any($event.target).value)"
+                        class="w-full rounded-md border border-border bg-background pl-3 pr-10 py-2.5 text-sm text-text placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary transition-colors" />
                     <button type="submit"
-                        class="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted hover:text-primary transition p-1"
-                        aria-label="Search">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted hover:text-primary transition-colors p-1"
+                        aria-label="Submit search">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
@@ -135,51 +167,62 @@
                 </div>
             </form>
 
-            <a routerLink="/" (click)="closeAllMenus()"
-                class="block py-2.5 text-text-muted hover:text-text transition">
+            <!-- Nav links -->
+            <a routerLink="/" (click)="closeAllMenus()" routerLinkActive="text-primary font-semibold"
+                [routerLinkActiveOptions]="{ exact: true }"
+                class="flex items-center py-3 px-1 text-sm text-text-muted hover:text-text transition-colors border-b border-border focus:outline-none focus:ring-2 focus:ring-primary rounded">
                 Home
             </a>
-            <a routerLink="/products" (click)="closeAllMenus()"
-                class="block py-2.5 text-text-muted hover:text-text transition">
+            <a routerLink="/products" (click)="closeAllMenus()" routerLinkActive="text-primary font-semibold"
+                class="flex items-center py-3 px-1 text-sm text-text-muted hover:text-text transition-colors border-b border-border focus:outline-none focus:ring-2 focus:ring-primary rounded">
                 Products
             </a>
-            <a routerLink="/cart" (click)="closeAllMenus()" class="block py-2.5 text-text-muted hover:text-text transition">
-                Cart
-            </a>
 
-            <div class="pt-3 border-t border-border">
+            <!-- Auth section -->
+            <div class="pt-3">
                 @if (isAuthenticated()) {
-                <div class="mb-3 text-sm font-medium text-text">
-                    {{ getUserDisplayName() }}
+                <div class="flex items-center gap-2 px-1 py-2 mb-2">
+                    <div class="w-7 h-7 rounded-full bg-hero flex items-center justify-center shrink-0">
+                        <span class="text-xs font-bold text-primary">
+                            {{ getUserDisplayName().charAt(0).toUpperCase() }}
+                        </span>
+                    </div>
+                    <span class="text-sm font-semibold text-text truncate">{{ getUserDisplayName() }}</span>
                 </div>
                 <a routerLink="/account" (click)="closeAllMenus()"
-                    class="block text-text-muted hover:text-text transition mb-1 py-2.5 text-sm">
+                    class="flex items-center py-3 px-1 text-sm text-text-muted hover:text-text transition-colors focus:outline-none focus:ring-2 focus:ring-primary rounded">
                     My Account
                 </a>
                 <a routerLink="/orders" (click)="closeAllMenus()"
-                    class="block text-text-muted hover:text-text transition mb-1 py-2.5 text-sm">
+                    class="flex items-center py-3 px-1 text-sm text-text-muted hover:text-text transition-colors focus:outline-none focus:ring-2 focus:ring-primary rounded">
                     My Orders
                 </a>
                 @if (currentUser()?.role === 'ADMIN') {
-                <a routerLink="/admin/products" (click)="closeAllMenus()"
-                    class="block text-primary font-medium transition mb-1 py-2.5 text-sm">
-                    Admin
+                <a routerLink="/admin" (click)="closeAllMenus()"
+                    class="flex items-center py-3 px-1 text-sm text-primary font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-primary rounded">
+                    Admin Panel
                 </a>
                 }
-                <button type="button" (click)="logout()" class="block w-full text-left text-destructive text-sm py-2.5">
-                    Log out
-                </button>
+                <div class="border-t border-border mt-2 pt-2">
+                    <button type="button" (click)="logout()"
+                        class="w-full text-left py-3 px-1 text-sm text-destructive hover:text-destructive/80 transition-colors focus:outline-none focus:ring-2 focus:ring-destructive rounded">
+                        Log out
+                    </button>
+                </div>
                 } @else {
                 <a routerLink="/login" (click)="closeAllMenus()"
-                    class="block text-text-muted hover:text-text transition mb-1 py-2.5">
+                    class="flex items-center py-3 px-1 text-sm text-text-muted hover:text-text transition-colors focus:outline-none focus:ring-2 focus:ring-primary rounded">
                     Log in
                 </a>
-                <a routerLink="/register" (click)="closeAllMenus()"
-                    class="block bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-md text-center text-sm font-medium transition">
-                    Sign up
-                </a>
+                <div class="pt-2">
+                    <a routerLink="/register" (click)="closeAllMenus()"
+                        class="block bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-md text-center text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary">
+                        Sign up
+                    </a>
+                </div>
                 }
             </div>
+
         </div>
     </div>
     }

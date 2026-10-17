@@ -2,39 +2,39 @@
 
   <!-- Page header -->
   <div class="bg-surface border-b border-border">
-    <div class="max-w-7xl mx-auto px-4 py-8">
-      <h1 class="text-3xl font-bold text-text">Products</h1>
-      <p class="text-text-muted mt-1">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <h1 class="text-2xl sm:text-3xl font-bold text-text">Products</h1>
+      <p class="text-text-muted text-sm mt-1">
         @if (total() > 0) {
         {{ total() }} item{{ total() === 1 ? '' : 's' }} found
         } @else if (!loading()) {
-        No products found
+        Browse our catalog
         }
       </p>
     </div>
   </div>
 
-  <div class="max-w-7xl mx-auto px-4 py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-    <!-- Mobile filters toggle — hidden on lg+ where sidebar is always visible -->
+    <!-- Mobile filters toggle -->
     <div class="lg:hidden mb-4">
       <button type="button" (click)="toggleFilters()"
-        class="w-full flex items-center justify-between px-4 py-2.5 rounded-md border border-border bg-surface text-sm font-medium text-text hover:border-primary hover:text-primary transition">
+        class="w-full flex items-center justify-between px-4 py-3 rounded-md border border-border bg-surface text-sm font-medium text-text hover:border-primary hover:text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary">
         <span class="flex items-center gap-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
           </svg>
           Filters
           @if (hasActiveFilters()) {
           <span
-            class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary text-white text-xs font-semibold">
+            class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary text-white text-[10px] font-bold">
             ●
           </span>
           }
         </span>
-        <svg class="w-4 h-4 text-text-muted" [class.rotate-180]="filtersOpen()" fill="none" stroke="currentColor"
-          viewBox="0 0 24 24">
+        <svg class="w-4 h-4 text-text-muted transition-transform duration-200" [class.rotate-180]="filtersOpen()"
+          fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
         </svg>
       </button>
@@ -42,15 +42,16 @@
 
     <div class="flex flex-col lg:flex-row gap-8">
 
-      <!-- ───────────── Filters sidebar ───────────── -->
-      <aside [class]="filtersOpen() ? 'w-full lg:w-64 shrink-0' : 'hidden lg:block lg:w-64 shrink-0'">
-        <div class="bg-surface border border-border rounded-lg p-6 space-y-6 lg:sticky lg:top-24">
+      <!-- ─── Filters sidebar ─── -->
+      <aside [class]="filtersOpen() ? 'w-full lg:w-60 shrink-0' : 'hidden lg:block lg:w-60 shrink-0'"
+        aria-label="Product filters">
+        <div class="bg-surface border border-border rounded-lg p-5 space-y-5 lg:sticky lg:top-24">
 
           <div class="flex items-center justify-between">
-            <h2 class="text-base font-semibold text-text">Filters</h2>
+            <h2 class="text-sm font-semibold text-text">Filters</h2>
             @if (hasActiveFilters()) {
             <button type="button" (click)="clearFilters()"
-              class="text-sm text-primary hover:text-primary-hover transition">
+              class="text-xs text-primary hover:text-primary-hover transition-colors focus:outline-none focus:ring-2 focus:ring-primary rounded-sm">
               Clear all
             </button>
             }
@@ -58,18 +59,22 @@
 
           <!-- Search -->
           <div>
-            <label for="search" class="block text-sm font-medium text-text mb-2">Search</label>
+            <label for="search" class="block text-xs font-semibold text-text-muted uppercase tracking-wide mb-1.5">
+              Search
+            </label>
             <input id="search" type="text" placeholder="Search products…" [value]="searchTerm()"
               (input)="onSearchInput($any($event.target).value)"
-              class="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary transition" />
+              class="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-text placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors" />
           </div>
 
           <!-- Category -->
           <div>
-            <label for="category" class="block text-sm font-medium text-text mb-2">Category</label>
+            <label for="category" class="block text-xs font-semibold text-text-muted uppercase tracking-wide mb-1.5">
+              Category
+            </label>
             <select id="category" [value]="selectedCategoryId() ?? ''"
               (change)="onCategoryChange($any($event.target).value)"
-              class="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary transition">
+              class="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
               <option value="">All categories</option>
               @for (cat of categories(); track cat.id) {
               <option [value]="cat.id">{{ cat.name }}</option>
@@ -79,22 +84,32 @@
 
           <!-- Price range -->
           <div>
-            <span class="block text-sm font-medium text-text mb-2">Price range</span>
+            <span class="block text-xs font-semibold text-text-muted uppercase tracking-wide mb-1.5">
+              Price range
+            </span>
             <div class="flex gap-2">
-              <input type="number" placeholder="Min" min="0" [value]="minPrice() ?? ''"
-                (change)="onMinPriceChange($any($event.target).value)"
-                class="w-1/2 rounded-md border border-border bg-surface px-3 py-2 text-sm text-text placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary transition" />
-              <input type="number" placeholder="Max" min="0" [value]="maxPrice() ?? ''"
-                (change)="onMaxPriceChange($any($event.target).value)"
-                class="w-1/2 rounded-md border border-border bg-surface px-3 py-2 text-sm text-text placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary transition" />
+              <div class="flex-1">
+                <label for="min-price" class="sr-only">Minimum price</label>
+                <input id="min-price" type="number" placeholder="Min" min="0" [value]="minPrice() ?? ''"
+                  (change)="onMinPriceChange($any($event.target).value)"
+                  class="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-text placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary transition-colors" />
+              </div>
+              <div class="flex-1">
+                <label for="max-price" class="sr-only">Maximum price</label>
+                <input id="max-price" type="number" placeholder="Max" min="0" [value]="maxPrice() ?? ''"
+                  (change)="onMaxPriceChange($any($event.target).value)"
+                  class="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-text placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary transition-colors" />
+              </div>
             </div>
           </div>
 
           <!-- Sort -->
           <div>
-            <label for="sort" class="block text-sm font-medium text-text mb-2">Sort by</label>
+            <label for="sort" class="block text-xs font-semibold text-text-muted uppercase tracking-wide mb-1.5">
+              Sort by
+            </label>
             <select id="sort" [value]="sortBy() + '-' + sortOrder()" (change)="onSortChange($any($event.target).value)"
-              class="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary transition">
+              class="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors">
               <option value="createdAt-desc">Newest first</option>
               <option value="createdAt-asc">Oldest first</option>
               <option value="price-asc">Price: low to high</option>
@@ -107,19 +122,20 @@
         </div>
       </aside>
 
-      <!-- ───────────── Main content ───────────── -->
+      <!-- ─── Main content ─── -->
       <main class="flex-1 min-w-0">
 
         <!-- Loading skeletons -->
         @if (loading()) {
-        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
           @for (i of [1,2,3,4,5,6]; track i) {
           <div class="bg-surface border border-border rounded-lg overflow-hidden animate-pulse">
             <div class="bg-background h-52 w-full"></div>
             <div class="p-4 space-y-3">
+              <div class="h-3 bg-background rounded w-1/3"></div>
               <div class="h-4 bg-background rounded w-3/4"></div>
-              <div class="h-3 bg-background rounded w-1/2"></div>
-              <div class="h-5 bg-background rounded w-1/3"></div>
+              <div class="h-3 bg-background rounded w-5/6"></div>
+              <div class="h-5 bg-background rounded w-1/3 mt-2"></div>
             </div>
           </div>
           }
@@ -129,11 +145,17 @@
         <!-- Error state -->
         @if (!loading() && error()) {
         <div class="bg-surface border border-border rounded-lg p-12 text-center">
-          <div class="text-4xl mb-4">⚠️</div>
-          <h3 class="text-lg font-semibold text-text mb-2">Something went wrong</h3>
-          <p class="text-text-muted mb-6">{{ error() }}</p>
+          <div class="w-12 h-12 rounded-full bg-background flex items-center justify-center mx-auto mb-4">
+            <svg class="w-6 h-6 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 class="text-base font-semibold text-text mb-2">Something went wrong</h3>
+          <p class="text-sm text-text-muted mb-6">{{ error() }}</p>
           <button type="button" (click)="clearFilters()"
-            class="bg-primary hover:bg-primary-hover text-white px-6 py-2 rounded-md font-medium transition">
+            class="bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary">
             Try again
           </button>
         </div>
@@ -142,75 +164,75 @@
         <!-- Empty state -->
         @if (!loading() && !error() && products().length === 0) {
         <div class="bg-surface border border-border rounded-lg p-12 text-center">
-          <div class="text-5xl mb-4">🛋️</div>
-          <h3 class="text-lg font-semibold text-text mb-2">No products found</h3>
+          <div class="w-12 h-12 rounded-full bg-hero flex items-center justify-center mx-auto mb-4">
+            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <h3 class="text-base font-semibold text-text mb-2">No products found</h3>
           @if (hasActiveFilters()) {
-          <p class="text-text-muted mb-6">
+          <p class="text-sm text-text-muted mb-6">
             No products match your current filters. Try adjusting your search or clearing the filters.
           </p>
           <button type="button" (click)="clearFilters()"
-            class="bg-primary hover:bg-primary-hover text-white px-6 py-2 rounded-md font-medium transition">
+            class="bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary">
             Clear filters
           </button>
           } @else {
-          <p class="text-text-muted">Check back soon — new products are on the way.</p>
+          <p class="text-sm text-text-muted">Check back soon — new products are on the way.</p>
           }
         </div>
         }
 
         <!-- Product grid -->
         @if (!loading() && !error() && products().length > 0) {
-        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
           @for (product of products(); track product.id) {
           <app-product-card [product]="product" [categoryName]="getCategoryName(product.categoryId)" />
           }
         </div>
 
-        <!-- ───────────── Pagination ───────────── -->
+        <!-- Pagination -->
         @if (totalPages() > 1) {
         <nav aria-label="Product pagination" class="mt-10 flex flex-wrap items-center justify-center gap-1">
 
-          <!-- Prev -->
           <button type="button" [disabled]="page() === 1" (click)="onPageChange(page() - 1)"
-            class="px-3 py-2 rounded-md border border-border text-sm text-text-muted hover:border-primary hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed transition">
+            class="px-3 py-2 rounded-md border border-border text-sm text-text-muted hover:border-primary hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-primary">
             ← Prev
           </button>
 
-          <!-- First page + ellipsis if needed -->
           @if (getPageNumbers()[0] > 1) {
           <button type="button" (click)="onPageChange(1)"
-            class="w-9 h-9 rounded-md border border-border text-sm text-text-muted hover:border-primary hover:text-primary transition">
+            class="w-9 h-9 rounded-md border border-border text-sm text-text-muted hover:border-primary hover:text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary">
             1
           </button>
           @if (getPageNumbers()[0] > 2) {
-          <span class="px-1 text-text-muted text-sm select-none">…</span>
+          <span class="px-1 text-text-muted text-sm select-none" aria-hidden="true">…</span>
           }
           }
 
-          <!-- Page window -->
           @for (p of getPageNumbers(); track p) {
           <button type="button" (click)="onPageChange(p)" [attr.aria-current]="p === page() ? 'page' : null"
             [class]="p === page()
-                    ? 'w-9 h-9 rounded-md border border-primary bg-primary text-white text-sm font-medium'
-                    : 'w-9 h-9 rounded-md border border-border text-sm text-text-muted hover:border-primary hover:text-primary transition'">
+                                        ? 'w-9 h-9 rounded-md border border-primary bg-primary text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1'
+                                        : 'w-9 h-9 rounded-md border border-border text-sm text-text-muted hover:border-primary hover:text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary'">
             {{ p }}
           </button>
           }
 
-          <!-- Last page + ellipsis if needed -->
           @if (getPageNumbers()[getPageNumbers().length - 1] < totalPages()) { @if
             (getPageNumbers()[getPageNumbers().length - 1] < totalPages() - 1) { <span
-            class="px-1 text-text-muted text-sm select-none">…</span>
+            class="px-1 text-text-muted text-sm select-none" aria-hidden="true">…</span>
             }
             <button type="button" (click)="onPageChange(totalPages())"
-              class="w-9 h-9 rounded-md border border-border text-sm text-text-muted hover:border-primary hover:text-primary transition">
+              class="w-9 h-9 rounded-md border border-border text-sm text-text-muted hover:border-primary hover:text-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary">
               {{ totalPages() }}
             </button>
             }
 
-            <!-- Next -->
             <button type="button" [disabled]="page() === totalPages()" (click)="onPageChange(page() + 1)"
-              class="px-3 py-2 rounded-md border border-border text-sm text-text-muted hover:border-primary hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed transition">
+              class="px-3 py-2 rounded-md border border-border text-sm text-text-muted hover:border-primary hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-primary">
               Next →
             </button>
 
