@@ -1,8 +1,10 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, effect, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { CurrencyPipe } from '@angular/common';
 import { CartService } from '../../core/services/cart.service';
 import { OrdersService } from '../../core/services/orders.service';
+import { ProductsService } from '../../core/services/products.service';
+import type { CartItem } from '../../core/models/cart.model';
 import type { NormalizedError } from '../../core/interceptors/error.interceptor';
 
 @Component({
@@ -13,6 +15,7 @@ import type { NormalizedError } from '../../core/interceptors/error.interceptor'
 export class CartPage implements OnInit {
     readonly cartService = inject(CartService);
     private readonly ordersService = inject(OrdersService);
+    private readonly productsService = inject(ProductsService);
     private readonly router = inject(Router);
 
     // ---------- UI state ----------
@@ -21,10 +24,49 @@ export class CartPage implements OnInit {
     readonly checkoutLoading = signal(false);
 
     /**
+     * Map of productId → image URL for items currently in cart.
+     */
+    readonly itemImages = signal<Record<string, string>>({});
+    private readonly requestedProductIds = new Set<string>();
+
+    /**
      * Per-item loading map: productId → true while an update/remove is in flight.
      * Prevents double-clicks without disabling the whole page.
      */
     readonly itemLoading = signal<Record<string, boolean>>({});
+
+    constructor() {
+        effect(() => {
+            const cart = this.cartService.cartSignal();
+            if (cart?.items) {
+                this.loadItemImages(cart.items);
+            }
+        });
+    }
+
+    private loadItemImages(items: CartItem[]): void {
+        for (const item of items) {
+            if (this.requestedProductIds.has(item.productId)) {
+                continue;
+            }
+            this.requestedProductIds.add(item.productId);
+
+            this.productsService.getProduct(item.productId).subscribe({
+                next: (product) => {
+                    const url = product.images?.[0]?.url;
+                    if (url) {
+                        this.itemImages.update((current) => ({
+                            ...current,
+                            [item.productId]: url,
+                        }));
+                    }
+                },
+                error: () => {
+                    // Fail safely without breaking cart; template preserves letter avatar fallback.
+                },
+            });
+        }
+    }
 
     ngOnInit(): void {
         // cartSignal may already be populated by the service constructor (authenticated
